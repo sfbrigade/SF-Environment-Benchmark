@@ -64,7 +64,7 @@ function mapDraw(err, apiData, collection){
     var valuesArr = objArrayToSortedNumArray(chartData).filter(function (d) { return d > 0 })
     var thresholds = arrayQuartiles(valuesArr)
     color.domain(thresholds)
-    console.log(valuesArr.every(function(el){return (typeof el === 'number')}))
+    // console.log(valuesArr.every(function(el){return (typeof el === 'number')}))
     var transform = d3.geo.transform({point: projectPoint}),
         path = d3.geo.path().projection(transform);
     var feature = g.selectAll("path")

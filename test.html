@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="lib/c3.css">
+<body>
+<script src="lib/d3.v3.min.js"></script>
+<script src="lib/c3.js"></script>
+<!-- <script>
+
+  var width = 500,
+      height = 500,
+      radius = Math.min(width, height) / 2;
+
+  var color = d3.scale.ordinal()
+      .range(["#e9a447", "#b4b4b4"]);
+
+  var arc = d3.svg.arc()
+      .outerRadius(radius - 10)
+      .innerRadius(radius - 70);
+
+  var pie = d3.layout.pie()
+      .sort(null)
+      .value(function(d) { return d.value; });
+
+  var svg = d3.select("body").append("svg")
+      .attr("width", width)
+      .attr("height", height)
+    .append("g")
+      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+  d3.csv("test.csv", type, function(error, data) {
+    if (error) throw error;
+
+    var foo = findValueAndTotal('foo1',data)
+
+    var g = svg.selectAll(".arc")
+        .data(pie(foo))
+      .enter().append("g")
+        .attr("class", "arc");
+
+    g.append("path")
+        .attr("d", arc)
+        .style("fill", function(d) { return color(d.data.category); });
+
+
+  });
+
+  function findValueAndTotal(category, data){
+    /* expecting data to be [{value: number, category: string}] */
+    var total = data.reduce(function(acc, val) {
+      return acc + val.value;
+    }, 0)
+    var value = data.find(function(el){
+      return el.category === category
+    }).value
+    return [{value: value, category: category}, {value:total-value, category: 'the-rest'}]
+  }
+
+  function type(d) {
+    d.value = +d.value;
+    return d;
+  }
+
+</script>
+ -->
+<div id="ringchart"></div>
+<script>
+// d3.csv("test.csv", function(error, data) {
+  // if (error) throw error;
+
+  // var foo = findValueAndTotal('foo1',data)
+
+  var range = [0,100];
+  var colorDomain = ['#FF0000', '#F97600', '#F6C600', '#60B044'];
+  var colorRange = [40, 60, 80, 100];
+  var gaugeHeight = 200;
+  var gaugeWidth = 200;
+
+  var chart = c3.generate({
+      bindto: '#ringchart',
+      data: {
+          columns: [
+              ['data', 0]
+          ],
+          type: 'gauge'
+      },
+      gauge: {
+        // units: 'units',
+        label: {
+           show:false, // to turn off the min/max labels.
+           format: function(value, ratio) {
+               return value + ' out of ' + range[1];
+           }
+        },
+        min: range[0], // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change
+        max: range[1],
+        width: 20, // for adjusting arc thickness
+        startingAngle: 0,
+        fullCircle: true
+      },
+      color: {
+          pattern: colorDomain, // the three color levels for the percentage values.
+          threshold: {
+             unit: 'value', // percentage is default
+             max: range[1], // 100 is default
+              values: colorRange
+          }
+      },
+      size: {
+          height: gaugeHeight,
+          width: gaugeWidth
+      }
+  });
+
+  chart.load({
+        columns: [['data', 100]]
+    });
+
+
+// });
+</script>
+</body>

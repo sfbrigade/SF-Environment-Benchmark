@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>SF Building Dashboard</title>
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+	<script src="http://d3js.org/d3.v3.min.js" type="text/javascript"></script>
+	<script src="https://d3js.org/d3-queue.v2.min.js" type="text/javascript"></script>
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	<script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+	<script src="https://cdn.datatables.net/responsive/2.1.0/js/dataTables.responsive.min.js"></script>
+	<!-- <link href='https://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'> -->
+	<link rel="stylesheet" href="css/normalize.css">
+	<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+	<div class="wrap">
+
+		<header class="main-header">
+			<div class="container">
+				<!-- <h1 class="name"><a href="#">SF Benchmark Results</a></h1> -->
+				<ul class="main-nav">
+					<li>SF Benchmark Results</li>
+					<li>
+						<div class="btn-group category-dropdown">
+								<button type="button" class="btn btn-md btn-default dropdown-toggle" id="category-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									<small>Category</small>
+									<span class="caret"></span>
+								</button>
+								<ul id="category-filters-dropdown" class="dropdown-menu">
+								</ul>
+						</div>
+					</li>
+				</ul>
+			</div>
+		</header>
+
+		<div class="container">
+
+			<div class="primary col">
+				<div class="widget">
+					<div class="widget-heading">
+						<h2>Energy Star Score Distribution</h2>
+						<span class="pull-right"><i class="fa fa-info-circle"></i></span>
+					</div>
+					<div class="widget-content">
+						<div class="loading">Loading&mdash;</div>
+						<div id="chart-histogram" class="histogram-chart"></div>
+					</div>
+				</div>
+				<div class="widget">
+					<div class="widget-heading">
+						<h2>Energy Use Intensity (EUI)</h2>
+					</div>
+					<div class="widget-content">
+						<div class="loading">Loading&mdash;</div>
+	          <div id="chart-stackedbar" class="chart-stackedbar"></div>
+					</div>
+				</div>
+				<div class="widget">
+					<div class="widget-heading">
+						<h2>GHG Emission vs. Site EUI</h2>
+					</div>
+					<div class="widget-content">
+						<label for="">Radius sized by floor area</label>
+						<div class="loading">Loading&mdash;</div>
+	          <div id="chart-bubble" class="chart-bubble"></div>
+					</div>
+				</div>
+				<div class="widget hide" id="widget-map">
+					<div class="widget-heading">
+						<!-- <h2>Map View</h2> -->
+					</div>
+					<div class="widget-content">
+						<div id="map"></div>
+					</div>
+				</div>
+			</div><!--/.primary-->
+
+			<div class="secondary col">
+				<div class="widget" id="widget-table">
+					<div class="widget-heading">
+						<h2>Buildings</h2>
+						<span><small>Click on row to select building</small></span>
+					</div>
+					<div class="widget-content">
+						<table id="infotable" class="table hover" style="width:100%"></table>
+					</div>
+				</div>
+				<!-- <div class="widget" id="widget-map">
+					<div class="widget-heading">
+						<h2>Map View</h2>
+					</div>
+					<div class="widget-content">
+						<div id="map"></div>
+					</div>
+				</div> -->
+				<div class="widget">
+					<div class="widget-heading">
+						<h2>Summary</h2>
+						<span><i class="fa fa-info-circle"></i></span>
+					</div>
+					<dl class="dl-horizontal">
+						<dt>Type of Building</dt><dd id="table-type">&mdash;</dd>
+						<dt># of Properties</dt><dd id="table-count">&mdash;</dd>
+						<dt>Floor Area</dt><dd id="table-floor_area">&mdash;</dd>
+						<dt>Total GHG Emissions</dt><dd id="table-total_ghg">&mdash;</dd>
+						<dt>Compliance Rate</dt><dd id="table-compliance">&mdash;</dd>
+					</dl>
+					<div id="active-property" class="table">
+						<dl class="dl-horizontal">
+							 <dt>Address</dt><dd>&mdash;</dd>
+							 <dt>Building Type</dt><dd>&mdash;</dd>
+							 <dt>Latest Benchmark Year</dt><dd>&mdash;</dd>
+							 <dt>Energy Star Score</dt><dd>&mdash;</dd>
+							 <dt>Site EUI</dt><dd>&mdash;</dd>
+							 <dt>GHG Emissions (MT CO<sup>2</sup>)</dt><dd>&mdash;</dd>
+							 <dt>Floor Area</dt><dd>&mdash;</dd>
+						 </dl>
+					</div>
+				</div>
+			</div><!--/.secondary-->
+
+			<!-- <div class="col col-full hide">
+				<div class="widget" id="widget-map">
+					<div class="widget-heading">
+						<h2>Map View</h2>
+					</div>
+					<div class="widget-content">
+						<div id="map"></div>
+					</div>
+				</div>
+
+				<div class="widget" id="widget-table">
+					<div class="widget-heading">
+						<h2>Buildings</h2>
+						Click on row to select that building
+					</div>
+					<div class="widget-content">
+						<table id="infotable" class="table hover" style="width:100%"></table>
+					</div>
+				</div>
+			</div> -->
+
+		</div><!--/.container-->
+
+	</div><!--/.wrap-->
+
+
+
+	<footer class="main-footer">
+	 <span>%src% %date%</span>
+	</footer>
+	<script src="../js/scatter-plot.js"></script>
+	<script src="../js/histogram-chart.js"></script>
+	<script src="../js/quartiles-chart.js"></script>
+	<script src="dashboard.js"></script>
+</body>
+</html>

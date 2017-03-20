@@ -64,7 +64,7 @@ function mapDraw(err, apiData, collection){
     var valuesArr = objArrayToSortedNumArray(chartData).filter(function (d) { return d > 0 })
     var thresholds = arrayQuartiles(valuesArr)
     color.domain(thresholds)
-    console.log(valuesArr.every(function(el){return (typeof el === 'number')}))
+    // console.log(valuesArr.every(function(el){return (typeof el === 'number')}))
     var transform = d3.geo.transform({point: projectPoint}),
         path = d3.geo.path().projection(transform);
     var feature = g.selectAll("path")
@@ -285,6 +285,20 @@ function mapDraw(err, apiData, collection){
             scorebox.style.color = '#fff';
         } else { // boxNumber == null or N/A
             scorebox.style.color = '#333';
+        }
+      } else if (colorMetric == 'total_ghg_emissions_intensity_kgco2e_ft2') {
+        scorebox.style.color = '#333';
+      } else if (colorMetric == 'source_eui_kbtu_ft2') {
+        if (boxNumber > 175) {
+          scorebox.style.color = '#fff';
+        } else {
+          scorebox.style.color = '#333';
+        }
+      } else if (colorMetric == 'site_eui_kbtu_ft2') {
+        if (boxNumber > 49) {
+          scorebox.style.color = '#fff';
+        } else {
+          scorebox.style.color = '#333';
         }
       } else {
         scorebox.style.color = '#333';

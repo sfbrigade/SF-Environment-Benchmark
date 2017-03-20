@@ -3,26 +3,20 @@
 //TODO: CHANGE limit on returned properties in function propertyTypeQuery()
 const DATASOURCE = '75rg-imyz' // 'j2j3-acqj'
 const METRICS = ['benchmark','energy_star_score','site_eui_kbtu_ft2','source_eui_kbtu_ft2','percent_better_than_national_median_site_eui','percent_better_than_national_median_source_eui','total_ghg_emissions_metric_tons_co2e','total_ghg_emissions_intensity_kgco2e_ft2','weather_normalized_site_eui_kbtu_ft2','weather_normalized_source_eui_kbtu_ft2']
-const LIMITEDMETRICS = ['latest_energy_star_score', 'latest_total_ghg_emissions_metric_tons_co2e', 'latest_site_eui_kbtu_ft2']
+const LIMITEDMETRICS = ['latest_energy_star_score', 'latest_total_ghg_emissions_metric_tons_co2e', 'latest_weather_normalized_site_eui_kbtu_ft2']
 const BLK = /(.+)\//
 const LOT = /[\/\.](.+)/
 
 /* glogal reference objects */
 /* colorSwatches should be shared between map.js & dashboard.js */
-var colorSwatches = {
-      energy_star_score: ['#FD6C16','#FEB921','#46AEE6','#134D9C'],
-      total_ghg_emissions_intensity_kgco2e_ft2: ['#f4fde8','#b6e9ba','#76cec7','#3ea3d3'],
-      site_eui_kbtu_ft2: ['#134D9C','#46AEE6', '#FEB921', '#FD6C16'],
-      site_eui_kbtu_ft2: ['#ffffe0','#ffa474','#db4551','#8b0000'],
+const colorSwatches = {
+      foo: ['#FD6C16','#FEB921','#46AEE6','#134D9C'],
       highlight: '#ff00fc'
     };
 
-var color = {
-  energy_star_score: d3.scale.threshold().range(colorSwatches.energy_star_score),
-  total_ghg_emissions_intensity_kgco2e_ft2: d3.scale.threshold().range(colorSwatches.total_ghg_emissions_intensity_kgco2e_ft2),
-  site_eui_kbtu_ft2: d3.scale.threshold().range(colorSwatches.site_eui_kbtu_ft2),
-  site_eui_kbtu_ft2: d3.scale.threshold().range(colorSwatches.site_eui_kbtu_ft2)
-}
+let color = {
+  energy_star_score: d3.scale.threshold().range(colorSwatches.foo),
+  }
 
 /* use soda-js to query */
 // ref: https://github.com/socrata/soda-js
@@ -92,23 +86,14 @@ for (let category in groups){
 
 
 /* page elements */
-var estarHistogramElement = d3.select('#estar-histogram')
-var width = 500 //parseInt(estarHistogramElement.style('width'))
-var estarHistogram = histogramChart()
+var chartHistogram = d3.select('#chart-histogram')
+var width = 500 //parseInt(chartHistogram.style('width'))
+var histogram = histogramChart()
   .width(width)
   .height(200)
   .range([0,104])
   .bins(50)
   .tickFormat(d3.format(',d'))
-
-var ghgHistogramElement = d3.select('#ghg-histogram')
-var width = 500 //parseInt(ghgHistogramElement.style('width'))
-var ghgHistogram = histogramChart()
-  .width(width)
-  .height(200)
-  .tickFormat(d3.format(',d'))
-
-var euiChartElement = d3.select('#eui-stackedbar')
 
 /* variables for the ring chart */
 var ringRange = [0,100];
@@ -121,7 +106,7 @@ var ringWidth = 200;
  * Use c3.js for ring chart
  */
 var ringChart = c3.generate({
-   bindto: '#circle-chart',
+   bindto: '#ringchart',
    data: {
        columns: [
            ['data', 0]
@@ -162,14 +147,13 @@ var ringChart = c3.generate({
 /* query machine go! */
 let singleBuildingData
 let categoryData
-let floorAreaRange
 
 
-if(! offline){
+// if(! offline){
   propertyQuery( 1, {parcel_s: '3721/014'}, null, handleSingleBuildingResponse )
-}else{
-    handleSingleBuildingResponse(offline.single)
-}
+// }else{
+//     handleSingleBuildingResponse(offline.single)
+// }
 
 
 
@@ -259,12 +243,12 @@ function handleSingleBuildingResponse(rows) {
   let type = singleBuildingData.property_type_self_selected
   // let minMax = ts.invertExtent(ts(+singleBuildingData.floor_area))
   let minMax = groups[type].scale.invertExtent(groups[type].scale(+singleBuildingData.floor_area))
-  floorAreaRange = minMax
-  if(! offline){
+  // if(! offline){
     propertyQuery( null, null, formQueryString({where: whereArray( type, minMax )}), handlePropertyTypeResponse )
-  } else {
-    handlePropertyTypeResponse(offline.multiple)
-  }
+  // } else {
+  //   handlePropertyTypeResponse(offline.multiple)
+  // }
+
 
   ringChart.load({
     columns: [['data', +singleBuildingData.latest_energy_star_score]]
@@ -281,37 +265,10 @@ function handlePropertyTypeResponse(rows) {
   let estarVals = objArrayToSortedNumArray(categoryData, 'latest_energy_star_score')
   estarVals = estarVals.filter(function (d) { return d > 0 })
 
-  let ghgVals = objArrayToSortedNumArray(categoryData, 'latest_total_ghg_emissions_metric_tons_co2e')
-  ghgVals = ghgVals.filter(function (d) { return d > 0 })
-
-  let euiVals = objArrayToSortedNumArray(categoryData,'latest_site_eui_kbtu_ft2')
-  euiVals = euiVals.filter(function (d) { return d > 0 && d < 1000 }) /* 1000 here is arbitrary to cut out outlier of SFMOMA & some others*/
-
   /* draw histogram for energy star */
-  estarHistogram.colorScale(color.energy_star_score).bins(100).xAxisLabel('Energy Star Score').yAxisLabel('Buildings')
-  estarHistogramElement.datum(estarVals).call(estarHistogram)
-  // estarHistogramElement.call(histogramHighlight,-10)
-
-  /* draw histogram for ghg */
-  ghgHistogram
-    .range([0,d3.max(ghgVals)])
-    .colorScale(color.energy_star_score)
-    .bins(100)
-    .xAxisLabel('GHG Emissions (Metric Tons CO2)')
-    .yAxisLabel('Buildings')
-  ghgHistogramElement.datum(ghgVals).call(ghgHistogram)
-  // ghgHistogramElement.call(histogramHighlight,-10)
-
-  /* draw stacked bar for energy use intensity */
-  var euiChart = hStackedBarChart()
-    .width(200)
-    .height(60)
-    .colorScale(color.site_eui_kbtu_ft2)
-    .margin({top: 10, right: 50, bottom: 10, left: 50})
-
-  euiChartElement.datum(euiVals).call(euiChart)
-
-  populateInfoBoxes(singleBuildingData, categoryData, floorAreaRange)
+  histogram.colorScale(color.energy_star_score).bins(100).xAxisLabel('Energy Star Score').yAxisLabel('Buildings')
+  chartHistogram.datum(estarVals).call(histogram)
+  // chartHistogram.call(histogramHighlight,-10)
 }
 
 /**
@@ -407,46 +364,8 @@ function apiDataToArray (data) {
 //   return result
 // }
 
-/**
-* populateInfoBoxes - brute force put returned data into infoboxes on the page
-* @param {object} singleBuildingData - data for a single building
-* @param {object} categoryData - data for the single building's category
-* @param {object} floorAreaRange - floor area range for this category
-* @return null
-*/
-function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
-  d3.selectAll('.foo-num-site-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
-  d3.selectAll('.foo-num-ghg-emissions').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
-  d3.selectAll('.foo-building-type').text(singleBuildingData.property_type_self_selected)
-  d3.selectAll('.foo-building-area').text(numberWithCommas(singleBuildingData.floor_area) + ' ft2')
-  // d3.selectAll('.foo-building-compliance').text(singleBuildingData.)
-  d3.selectAll('.foo-building-name').text(singleBuildingData.building_name)
-  d3.selectAll('.foo-building-address').text(singleBuildingData.building_address)
-  d3.selectAll('.foo-building-floorrange').text(numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]))
 
-  let euirank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
-  d3.selectAll('.foo-eui-rank').text(euirank[0])
-  d3.selectAll('.foo-eui-rankn').text(euirank[1])
-}
 
-/**
-* rankBuildings - ranking algorithim, dumb sort for now
-* @param {string} id - building "ID" number
-* @param {array} bldgArray - processed/simplified building data
-* @param {string} prop - the property to rank by
-* @return {array} [rank, count]
-*/
-function rankBuildings (id, bldgArray, prop) {
-  //TODO: rank the buildings in te
-  let sorted = bldgArray.sort(function(a,b){
-    return +a[prop] - +b[prop]
-  })
-
-  let rank = sorted.findIndex(function(el){return el.id === id}) + 1
-  let count = sorted.length
-
-  return [rank, count]
-}
 
 
 /****** helper functions *******/
@@ -474,8 +393,8 @@ function objArrayToSortedNumArray (objArray,prop) {
 //   return Math.round(10*num)/10
 // }
 
-function numberWithCommas(x) {
-    var parts = x.toString().split(".");
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return parts.join(".");
-}
+// function numberWithCommas(x) {
+//     var parts = x.toString().split(".");
+//     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+//     return parts.join(".");
+// }

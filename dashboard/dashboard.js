@@ -250,7 +250,7 @@ function handlePropertyTypeResponse(rows) {
   *         - simple-statistics: https://github.com/simple-statistics/simple-statistics
   */
   // categoryData.zscoreVal = jstat.zscore(singleBuildingData.latest_energy_star_score, estarVals)
-  categoryData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
+  singleBuildingData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
 
   /* draw histogram for energy star */
   estarHistogram.colorScale(color.energy_star_score).bins(100).xAxisLabel('Energy Star Score').yAxisLabel('Buildings')
@@ -430,7 +430,7 @@ function apiDataToArray (data) {
 */
 function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.selectAll('.foo-num-estar-score').text(singleBuildingData.latest_energy_star_score)
-  d3.selectAll('.foo-num-local-zscore').text(categoryData.zscoreVal)
+  d3.selectAll('.foo-num-local-zscore').text(singleBuildingData.zscoreVal)
   d3.selectAll('.foo-num-site-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
   d3.selectAll('.foo-num-ghg-emissions').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
   d3.selectAll('.foo-building-type').text(singleBuildingData.property_type_self_selected)
@@ -443,6 +443,10 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   let euirank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
   d3.selectAll('.foo-eui-rank').text(euirank[0])
   d3.selectAll('.foo-eui-rankn').text(euirank[1])
+
+  let zscorerank = rankBuildings(singleBuildingData.ID, singleBuildingData, 'zscoreVal')
+  d3.selectAll('.foo-zscore-rank').text(zscorerank[0])
+  d3.selectAll('.foo-zscore-rankn').text(zscorerank[1])
 }
 
 /**

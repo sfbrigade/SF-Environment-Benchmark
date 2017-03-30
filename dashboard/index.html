@@ -44,7 +44,7 @@
 	<script src="../lib/c3.js"></script>
 	<script src="../lib/soda-js.bundle.js" type="text/javascript"></script>
 
-	<link rel="stylesheet" href="css/building_dashboard.css">
+	<link rel="stylesheet" href="css/dashboard.css">
 	<!-- <link rel="stylesheet" href="css/normalize.css"> -->
 	<link rel="stylesheet" href="css/style.css">
 </head>
@@ -142,17 +142,21 @@
 											<span class="dashboard-header ranking">ENERGY USE RANKING</span>
 										</div>
 										<div class="row center large">
+										<!--
 											<span class="dashboard-num-large foo-eui-rank">28</span><br>
 											<span class="energy-ranking">out of <span class="foo-eui-rankn">50</span>
+										-->
+											<span class="dashboard-num-large foo-zscore-rank">28</span><br>
+											<span class="energy-ranking">out of <span class="foo-zscore-rankn">50</span>
 										</div>
 									</div>
 									<div class="col-xs-8 ranking-text">
-										Based on the score and energy use intensity,
+										Based on the statistical normal score relative to it's peers and energy use intensity,
 										<span class="foo-building-name">Hotel Zetta</span>'s energy use is ranked #
-										<span class="foo-eui-rank">28</span> out of
-										<span class="foo-eui-rankn">50</span>
+										<span class="foo-zscore-rank">28</span> out of
+										<span class="foo-zscore-rankn">50</span>
 										<span class="foo-building-type">hotel</span> buildings sized between
-										<span class="foo-building-floorrange">100,000-250,000</span> square feet.
+										<span class="foo-building-floorrange">100,000-250,000</span> square feet in San Francisco.
 									</div>
 								</div>
 								<div class="row center border-bottom">
@@ -202,8 +206,10 @@
 									<div class="col-xs-4"><span class="circle-chart" id="circle-chart"></span></div>
 									<div class="col-xs-8">
 										<div class="ranking-text">
-											In 2015, <span class="foo-building-name">Hotel Zetta</span> earned an ENERGY STAR score of <span class="foo-num-estar-score">43</span>. The <span class="foo-building-type">hotel</span> median score is 50.<br>
+											In 2015, <span class="foo-building-name">Hotel Zetta</span> earned an ENERGY STAR score of <span class="foo-num-estar-score">43</span>. The <span class="foo-building-type">hotel</span> national median score is 50.
+										<!--<br>
 											It's z-score relative to Energy Star rating as compared to it's peers in the city of San Francisco is <span class="foo-num-local-zscore">43</span>
+										-->
 										</div>
 									</div>
 								</div>

@@ -149,11 +149,11 @@ let singleBuildingData
 let categoryData
 
 
-if(! offline){
+// if(! offline){
   propertyQuery( 1, {parcel_s: '3721/014'}, null, handleSingleBuildingResponse )
-}else{
-    handleSingleBuildingResponse(offline.single)
-}
+// }else{
+//     handleSingleBuildingResponse(offline.single)
+// }
 
 
 
@@ -243,11 +243,11 @@ function handleSingleBuildingResponse(rows) {
   let type = singleBuildingData.property_type_self_selected
   // let minMax = ts.invertExtent(ts(+singleBuildingData.floor_area))
   let minMax = groups[type].scale.invertExtent(groups[type].scale(+singleBuildingData.floor_area))
-  if(! offline){
+  // if(! offline){
     propertyQuery( null, null, formQueryString({where: whereArray( type, minMax )}), handlePropertyTypeResponse )
-  } else {
-    handlePropertyTypeResponse(offline.multiple)
-  }
+  // } else {
+  //   handlePropertyTypeResponse(offline.multiple)
+  // }
 
 
   ringChart.load({

@@ -1,483 +1,518 @@
-// TODO: colorscale is not being recalculated for new data
+"use strict";
 
-/* We should totally be using dc for this project. http://dc-js.github.io/dc.js/ */
+//TODO: CHANGE limit on returned properties in function propertyTypeQuery()
+const DATASOURCE = '75rg-imyz' // 'j2j3-acqj'
+const METRICS = ['benchmark','energy_star_score','site_eui_kbtu_ft2','source_eui_kbtu_ft2','percent_better_than_national_median_site_eui','percent_better_than_national_median_source_eui','total_ghg_emissions_metric_tons_co2e','total_ghg_emissions_intensity_kgco2e_ft2','weather_normalized_site_eui_kbtu_ft2','weather_normalized_source_eui_kbtu_ft2']
+const LIMITEDMETRICS = ['latest_energy_star_score', 'latest_total_ghg_emissions_metric_tons_co2e', 'latest_site_eui_kbtu_ft2']
+const BLK = /(.+)\//
+const LOT = /[\/\.](.+)/
 
 /* glogal reference objects */
 /* colorSwatches should be shared between map.js & dashboard.js */
 var colorSwatches = {
       energy_star_score: ['#FD6C16','#FEB921','#46AEE6','#134D9C'],
       total_ghg_emissions_intensity_kgco2e_ft2: ['#f4fde8','#b6e9ba','#76cec7','#3ea3d3'],
-      source_eui_kbtu_ft2: ['#134D9C','#46AEE6', '#FEB921', '#FD6C16'],
-      site_eui_kbtu_ft2: ['#ffffe0','#ffa474','#db4551','#8b0000'],
+      site_eui_kbtu_ft2: ['#134D9C','#46AEE6', '#FEB921', '#FD6C16'],
       highlight: '#ff00fc'
     };
 
 var color = {
   energy_star_score: d3.scale.threshold().range(colorSwatches.energy_star_score),
   total_ghg_emissions_intensity_kgco2e_ft2: d3.scale.threshold().range(colorSwatches.total_ghg_emissions_intensity_kgco2e_ft2),
-  source_eui_kbtu_ft2: d3.scale.threshold().range(colorSwatches.source_eui_kbtu_ft2),
   site_eui_kbtu_ft2: d3.scale.threshold().range(colorSwatches.site_eui_kbtu_ft2)
 }
 
-/* categoryFilters should be shared between map.js & dashboard.js */
-var categoryFilters = [
-  'All',
-  'Office',
-  'Hotel',
-  'Retail Store',
-  'Other',
-  'Mixed Use Property',
-  'Non-Refrigerated Warehouse',
-  'Worship Facility',
-  'College/University',
-  'Supermarket/Grocery Store',
-  'Medical Office',
-  'Manufacturing/Industrial Plant',
-  'Distribution Center',
-  'Automobile Dealership',
-  'Restaurant',
-  'N/A'
-];
+/* use soda-js to query */
+// ref: https://github.com/socrata/soda-js
+let consumer = new soda.Consumer('data.sfgov.org')
 
-var width = parseInt(d3.select('#chart-histogram').style('width'))
+/* variables for testing */
+// let specificParcel = {parcel_s: '0267/009'}
+// let testquery = {
+//   // columns: 'property_type_self_selected, parcel_s, floor_area',
+//   where: whereArray( 'Office', [100000, 200000] ),
+//   // limit: 10
+// }
 
-/* Storing parcel data globally */
-var returnedApiData = []
+let groups = {
+  Office:{
+    names: [
+      '<25k',
+      '25-50k',
+      '50-100k',
+      '100-300k',
+      '>300k'
+    ],
+    floorArea: [
+      25000,
+      50000,
+      100000,
+      300000
+    ]
+  },
+  Hotel: {
+    names: [
+      '<25k',
+      '25-50k',
+      '50-100k',
+      '100-250k',
+      '>250k'
+    ],
+    floorArea: [
+      25000,
+      50000,
+      100000,
+      250000
+    ]
+  },
+  Retail: {
+    names: [
+      '<20k',
+      '>20k'
+    ],
+    floorArea: [
+      20000
+    ]
+  }
+}
+for (let category in groups){
+  /* d3.scale to get "similar" sized buildings */
+  groups[category].scale = d3.scale.threshold()
+        .domain(groups[category].floorArea)
+        .range(groups[category].names);
+}
 
-/* page state data */
-var activeCategory = 'All'
+/* example queries */
+// console.log( formQueryString(testquery) )
+// propertyQuery( 1, specificParcel, null, handleSingleBuildingResponse )
+// propertyQuery( null, null, formQueryString(testquery), handlePropertyTypeResponse )
+// propertyQuery( null, {property_type_self_selected:'Office'}, null, handlePropertyTypeResponse )
 
-/* pointers to dom elements */
-var chartHistogram = d3.select('#chart-histogram')
-var chartStackedBar = d3.select('#chart-stackedbar')
-var chartBubble = d3.select('#chart-bubble')
-var scorebox = document.getElementById('scorebox')
 
-/* global chart objects */
-var histogram = histogramChart()
-  .width(width)
+/* page elements */
+var estarHistogramElement = d3.select('#energy-star-score-histogram')
+var estarWidth = 500 //parseInt(estarHistogramElement.style('width'))
+var estarHistogram = histogramChart()
+  .width(estarWidth)
   .height(200)
   .range([0,104])
   .bins(50)
   .tickFormat(d3.format(',d'))
-var stackedBar = hStackedBarChart()
-  .width(width)
-  .height(60)
-  .margin({top: 10, right: 50, bottom: 10, left: 50})
-var bubbles = scatterPlot()
-  .width(width)
-  .height(300)
-  .margin({left: 50})
 
-/* var soda = require('soda-js');
-var fs = require('fs');
-var consumer = new soda.Consumer('data.sfgov.org') */
+var ghgHistogramElement = d3.select('#ghg-emissions-histogram')
+var ghgWidth = 500 //parseInt(ghgHistogramElement.style('width'))
+var ghgHistogram = histogramChart()
+  .width(ghgWidth)
+  .height(200)
+  .tickFormat(d3.format(',d'))
 
-d3.select(window).on('resize', windowResize);
-/*
-consumer.query()
-  .withDataset('75rg-imyz')
-  .limit(2000)
-  .getRows()
-    .on('success', function(rows) { console.log(rows); 
-                    fs.writeFile("./data/75rg-imyz.json", JSON.stringify(rows), function(err) {
-                    if(err) {
-                        return console.log(err);
-                     } });})
-    .on('error', function(error) { console.error(error); });
+var euiChartElement = d3.select('#eui-stackedbar')
+
+
+
+
+
+
+/* query machine go! */
+let singleBuildingData
+let categoryData
+let floorAreaRange
+
+
+// if(! offline){
+  propertyQuery( 1, {parcel_s: '3721/014'}, null, handleSingleBuildingResponse )
+// }else{
+//     handleSingleBuildingResponse(offline.single)
+// }
+
+
+
+
+
+/**
+* whereArray - form the 'where array' that goes into formQueryString
+* @param {string} propertyType - property_type_self_selected
+* @param {array} range - [min,max] of floor_area
+* @return {array} the 'where array'
 */
+function whereArray(propertyType, range){
+  if (range[0] == undefined) {range[0] = 0}
+  let res = [
+    "property_type_self_selected='" + propertyType + "'",
+    'floor_area > ' + range[0]
+  ]
+  if (range[1]) {
+    res.push('floor_area < ' + range[1])
+  }
+  return res
+}
 
-/* get the data and render the page */
-d3_queue.queue()
-    .defer(d3.json, '../data/75rg-imyz.json')  /* https://data.sfgov.org/resource/j2j3-acqj.json?$limit=2000 */
-    .await(renderCharts)
-function renderCharts (error, apiData) {
-  $('.loading').remove()
-  returnedApiData = parseData(apiData)
+/**
+* formQueryString - form a SOQL query string
+* for multi-condition WHERE, otherwise use soda-js Consumer
+* see https://dev.socrata.com/docs/queries/query.html
+* @param {object} params - query params, limited in implementation
+* @return {string} the query string
+*/
+function formQueryString(params){
+  let query = 'SELECT '
 
-  var estarVals = objArrayToSortedNumArray(apiDataToArray('latest_energy_star_score'))
+  if (params.columns){
+    // params.columns is a string of comma separated column headings
+    query += params.columns + ' '
+  } else {
+    query += '* '
+  }
+
+  if (params.where){
+    // params.where is an array of conditions written out as strings
+    query += 'WHERE ' + params.where[0] + ' '
+    let i = 1, len = params.where.length
+    if (len > 1){
+      for (; i<len; i++) {
+        query += 'AND ' + params.where[i] + ' '
+      }
+    }
+  }
+
+  if (params.limit){
+    //params.limit is an integer
+    query += 'LIMIT ' + params.limit
+  }
+
+  return query
+}
+
+/**
+* propertyQuery - query sfdata for a parcel or parcels
+* @param {number} limit - how many entries to return
+* @param {object} whereparams - query params, generally of the form {parcel_s: "####/###"} or {property_type_self_selected: "Office"}
+* @param {string} soqlQuery - complete SOQL query string.  it seems this will override parameters in 'limit' and 'whereparams' if not null
+* @param {function} handler - callback handler function for returned json
+* @return some sort of promise
+*/
+function propertyQuery(limit, whereparams, soqlQuery, handler) {
+  consumer.query()
+    .withDataset(DATASOURCE)
+    .limit(limit)
+    .where(whereparams)
+    .soql(soqlQuery)
+    .getRows()
+      // this might be starting down the road to callback hell
+      .on('success', handler)
+      .on('error', function(error) { console.error(error); });
+}
+
+/**
+* handleSingleBuildingResponse - do something with the returned data, expects only one row
+* @param {array} rows - returned from consumer.query.getRows, expects rows.length === 0
+*/
+function handleSingleBuildingResponse(rows) {
+  singleBuildingData = parseSingleRecord(rows[0]) //save data in global var
+
+  let type = singleBuildingData.property_type_self_selected
+  // let minMax = ts.invertExtent(ts(+singleBuildingData.floor_area))
+  let minMax = groups[type].scale.invertExtent(groups[type].scale(+singleBuildingData.floor_area))
+  floorAreaRange = minMax
+  // if(! offline){
+    propertyQuery( null, null, formQueryString({where: whereArray( type, minMax )}), handlePropertyTypeResponse )
+  // } else {
+  //   handlePropertyTypeResponse(offline.multiple)
+  // }
+}
+
+/**
+* handlePropertyTypeResponse - do something with the returned data
+* @param {array} rows - returned from consumer.query.getRows
+*/
+function handlePropertyTypeResponse(rows) {
+  categoryData = apiDataToArray( rows.map(parseSingleRecord) ) //save data in global var
+
+  let estarVals = objArrayToSortedNumArray(categoryData, 'latest_energy_star_score')
   estarVals = estarVals.filter(function (d) { return d > 0 })
 
-  var euiVals = objArrayToSortedNumArray(apiDataToArray('latest_site_eui_kbtu_ft2'))
+  let ghgVals = objArrayToSortedNumArray(categoryData, 'latest_total_ghg_emissions_metric_tons_co2e')
+  ghgVals = ghgVals.filter(function (d) { return d > 0 })
+
+  let euiVals = objArrayToSortedNumArray(categoryData,'latest_site_eui_kbtu_ft2')
   euiVals = euiVals.filter(function (d) { return d > 0 && d < 1000 }) /* 1000 here is arbitrary to cut out outlier of SFMOMA & some others*/
 
-  var scatterPlotVals = apiDataToXYR('latest_site_eui_kbtu_ft2', 'latest_total_ghg_emissions_metric_tons_co2e', 'floor_area')
-  scatterPlotVals = scatterPlotVals.filter(function(d){ return d.x < 1000 }) /* 1000 here is arbitrary to cut out outlier of SFMOMA & some others*/
+  /* set color domains */
+  var estarQuartiles = arrayQuartiles(estarVals)
+  color.energy_star_score.domain(estarQuartiles)
+  color.total_ghg_emissions_intensity_kgco2e_ft2.domain(arrayQuartiles(ghgVals))
+  color.site_eui_kbtu_ft2.domain(arrayQuartiles(euiVals))
 
-  /* color assigned by quartile */
-  color.energy_star_score.domain(arrayQuartiles(estarVals))
-  color.source_eui_kbtu_ft2.domain(arrayQuartiles(euiVals))
-  // color.total_ghg_emissions_intensity_kgco2e_ft2.domain(arrayQuartiles(ghgVals))
+  /** Calculate z-score (Wasted a lot of time trying to get JS libs to work here, seems to be a lot easer to
+  *                      explicitly calculat it--admittedly, it could be me as I'm not super JavaScript savvy)
+  *       Libraries explored:
+  *         - jStat: https://github.com/jstat/jstat
+  *         - simple-statistics: https://github.com/simple-statistics/simple-statistics
+  */
+  // categoryData.zscoreVal = jstat.zscore(singleBuildingData.latest_energy_star_score, estarVals)
+  categoryData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
 
   /* draw histogram for energy star */
-  histogram.colorScale(color.energy_star_score).bins(100).xAxisLabel('Energy Star Score').yAxisLabel('Buildings')
-  chartHistogram.datum(estarVals).call(histogram)
-  chartHistogram.call(histogramHighlight,-10)
+  estarHistogram.colorScale(color.energy_star_score).bins(100).xAxisLabel('Energy Star Score').yAxisLabel('Buildings')
+  estarHistogramElement.datum(estarVals).call(estarHistogram)
+  estarHistogramElement.call(histogramHighlight,singleBuildingData.latest_energy_star_score, estarHistogram)
+
+  /* draw histogram for ghg */
+  ghgHistogram
+    .range([0,d3.max(ghgVals)])
+    .colorScale(color.energy_star_score)
+    .bins(100)
+    .xAxisLabel('GHG Emissions (Metric Tons CO2)')
+    .yAxisLabel('Buildings')
+  ghgHistogramElement.datum(ghgVals).call(ghgHistogram)
+  ghgHistogramElement.call(histogramHighlight,singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e,ghgHistogram)
 
   /* draw stacked bar for energy use intensity */
-  stackedBar.colorScale(color.source_eui_kbtu_ft2)
-  chartStackedBar.datum(euiVals).call(stackedBar)
+  // var euiWidth = parseInt(euiChartElement.style('width'))
+  var euiWidth = 450
+  var euiChart = hStackedBarChart()
+    .width(euiWidth)
+    .height(60)
+    .colorScale(color.site_eui_kbtu_ft2)
+    .margin({top: 10, right: 50, bottom: 10, left: 50})
+  euiChartElement.datum(euiVals).call(euiChart)
+  euiChartElement.call(stackedBarHighlight, singleBuildingData.latest_site_eui_kbtu_ft2, euiChart)
 
-  /* draw bubble chart for estimated cost ? <<do we even have the data for this? */
-  /* draw bubble chart for greenhouse gases (ghg) instead */
-  bubbles.colorScale(color.source_eui_kbtu_ft2).xAxisLabel('Site EUI').yAxisLabel('GHG Emissions')
-  chartBubble.datum(scatterPlotVals).call(bubbles)
-  // chartBubble.call(chartBubbleHighlight,-10)
+  populateInfoBoxes(singleBuildingData, categoryData, floorAreaRange)
 
-  /* draw map */
-  //Setting up leaflet map
-  var map = L.map('widget-map').setView([37.7833, -122.4167], 13);
+  /* variables for the ring chart */
+  var ringRange = [0,100];
+  var ringHeight = 200;
+  var ringWidth = 200;
 
-  //Getting tile from Mapbox
-  var mapreturnedApiData = [];
-
-  L.tileLayer('https://api.tiles.mapbox.com/v4/mapbox.dark/{z}/{x}/{y}.png?access_token={accessToken}', {
-      maxZoom: 18,
-      minZoom: 10,
-      attributionControl: false,
-      id: 'smoningi.a304c3dc',
-      accessToken: 'pk.eyJ1Ijoic21vbmluZ2kiLCJhIjoiQ21rN1pjSSJ9.WKrPFjjb7LRMBjyban698g'
-  }).addTo(map);
-
-  var mapSVG = d3.select(map.getPanes().overlayPane).append("svg"),
-      mapG = mapSVG.append("g").attr("class", "leaflet-zoom-hide");
-
-  d3_queue.queue()
-      .defer(d3.json, "../data/j2j3-acqj.json") //this data has already loaded at this point, why is it doing it agian? /* https://data.sfgov.org/resource/j2j3-acqj.json?$limit=2000 */
-      .defer(d3.json, "../data/justGeo.geojson")
-      .await(mapDraw);
-
-  function mapDraw(err, apiData, collection){
-      mapreturnedApiData = parseData(apiData)
-      collection.features.forEach(function(feature){
-        var data = returnedApiData.find(function(el){
-          return el.parcel_s === feature.properties.parcel_s
-        })
-        if (data != undefined) feature.properties = data
-      })
-
-      var mapColor = color.energy_star_score;
-
-      var chartData = apiDataToArray('latest_energy_star_score');
-      var valuesArr = objArrayToSortedNumArray(chartData).filter(function (d) { return d > 0 })
-      var thresholds = arrayQuartiles(valuesArr)
-      // color.energy_star_score.domain(thresholds)
-      mapColor.domain(thresholds)
-
-      var transform = d3.geo.transform({point: projectPoint}),
-          path = d3.geo.path().projection(transform);
-
-      var feature = mapG.selectAll("path")
-          .data(collection.features)
-          .enter()
-          .append("path")
-          .attr("id", function(d){
-            return d.properties.ID;
-          })
-          .style("stroke", "#B9E7FF")
-          .style("stroke-width",0.1)
-          .style("fill", function(d){
-            if(isNaN(d.properties['latest_energy_star_score'])){ //->>>>>>> Need a good isNaN color
-              return "#FEB921";
-            } else{
-              return mapColor(parseInt(d.properties['latest_energy_star_score']));
-            }
-          })
-          .style("fill-opacity", 0.5)
-          .on("mouseover", function(d){
-            d3.select(this).style("fill-opacity",1)
-              .style("stroke", colorSwatches.highlight)
-              .style("stroke-width",2)
-              .style("fill", colorSwatches.highlight);
-          })
-          .on("mouseout", function(d){
-            d3.select(this).style("stroke", "#B9E7FF")
-              .style("stroke-width",0.1)
-              .style("fill", function(d){
-                return mapColor(parseInt(d.properties['latest_energy_star_score']));
-              });
-          });
-
-      map.on("viewreset", reset);
-      reset();
-
-
-      // Reposition the SVG to cover the features.
-      function reset() {
-          var bounds = path.bounds(collection),
-              topLeft = bounds[0],
-              bottomRight = bounds[1];
-
-          mapSVG.attr("width", bottomRight[0] - topLeft[0])
-              .attr("height", bottomRight[1] - topLeft[1])
-              .style("left", topLeft[0] + "px")
-              .style("top", topLeft[1] + "px");
-
-          mapG.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-
-          feature.attr("d", path);
-      }
-
-      // Use Leaflet to implement a D3 geometric transformation.
-      function projectPoint(x, y) {
-          var point = map.latLngToLayerPoint(new L.LatLng(y, x));
-          this.stream.point(point.x, point.y);
-      }
-
-    }
-
-
-
-
-  /* draw table for data */
-  $('#infotable').DataTable( {
-    responsive: true,
-    language: {
-      paginate: {
-        previous: '&lt;',
-        next: '&gt;'
-      }
-    },
-    bInfo: false,
-    data: returnedApiData,
-    columns: [
-      { title: "Address", data: "building_address", responsivePriority: 2 },
-      { title: "Building Name", data: "building_name", responsivePriority: 4 },
-      { title: "Floor Area", data: "floor_area", responsivePriority: 5 },
-      { title: "Property Type", data: "property_type_self_selected", responsivePriority: 3 }
-    ],
-    columnDefs: [
-      {
-        render: function ( data, type, row ) {
-          return numberWithCommas(data);
-        },
-        searchable: false,
-        targets: 2
-      },
-      {
-        render: function (data, type, row) {
-          return '<span class="likelink" onClick="dispatcher.changeCategory(\''+ data +'\')">'+data+'</span>'
-        },
-        targets: 3
-      }
-    ],
-    rowCallback: function( row, data, index) {
-      row.onclick = function(){
-        return dispatcher.selectBuilding(data.ID)
-      }
-    }
+  /**
+   * Use c3.js for ring chart
+   */
+  //  TODO: override standard mouseover behavior (hide data)
+  var ringChart = c3.generate({
+     bindto: '#energy-star-score-radial',
+     data: {
+         columns: [
+             ['data', 0]
+         ],
+         type: 'gauge'
+     },
+     gauge: {
+       // units: 'units',
+       label: {
+          show:false, // to turn off the min/max labels.
+          format: function(value, ratio) {
+              return value + ' out of ' + ringRange[1];
+          }
+       },
+       min: ringRange[0], // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change
+       max: ringRange[1],
+       width: 20, // for adjusting arc thickness
+       startingAngle: 0,
+       fullCircle: true
+     },
+     color: {
+         pattern: colorSwatches.energy_star_score, // the three color levels for the percentage values.
+         threshold: {
+            unit: 'value', // percentage is default
+            max: ringRange[1], // 100 is default
+            values: estarQuartiles
+         }
+     },
+     size: {
+         height: ringHeight,
+         width: ringWidth
+     }
   });
 
-  /* render info table */
-  digestTable(digestData('All'))
-
-  $("#category-filters-dropdown a").click(function(){dispatcher.changeCategory( $(this).html() )})
-  d3.selectAll('.dot').on('mouseover', function(d){ dispatcher.selectBuilding(d.id) })
+  ringChart.load({
+    columns: [['data', +singleBuildingData.latest_energy_star_score]]
+  });
 }
 
-var dispatcher = d3.dispatch('changeCategory', 'selectBuilding')
-dispatcher.on('changeCategory', function(newCategory){
-
-  // filterMapCategory(newCategory) /* only activates last filter selected */
-  var estarVals = objArrayToSortedNumArray(apiDataToArray('latest_energy_star_score', newCategory)).filter(function (d) { return d > 0 })
-  var euiVals = objArrayToSortedNumArray(apiDataToArray('latest_site_eui_kbtu_ft2', newCategory)).filter(function (d) { return d > 0 && d < 1000 }) /* 1000 here is arbitrary to cut out outlier of SFMOMA & some others*/
-  var scatterPlotVals = apiDataToXYR('latest_site_eui_kbtu_ft2', 'latest_total_ghg_emissions_metric_tons_co2e', 'floor_area', newCategory)
-  scatterPlotVals = scatterPlotVals.filter(function(d){ return d.x < 1000 }) /* 1000 here is arbitrary to cut out outlier of SFMOMA & some others*/
-
-  color.energy_star_score.domain(arrayQuartiles(estarVals))
-  // color.source_eui_kbtu_ft2.range(d3.extent(euiVals)).domain(arrayQuartiles(euiVals))
-  // TODO: something like ^this^
-
-  stackedBar.colorScale(color.source_eui_kbtu_ft2)
-
-  chartHistogram.datum(estarVals).call(histogram)
-  chartStackedBar.datum(euiVals).call(stackedBar)
-  chartBubble.datum(scatterPlotVals).call(bubbles)
-  digestTable(digestData(newCategory))
-
-  var tablesearch = (newCategory === "All") ? '' : newCategory
-  $('#infotable').DataTable().search(tablesearch).draw()
-  d3.selectAll('.dot').on('mouseover', function(d){ dispatcher.selectBuilding(d.id) })
-})
-dispatcher.on('selectBuilding', function(newBlockLot){
-  var blockLot = returnedApiData.find(function(el){
-    return el.ID === newBlockLot.toString()
+/**
+* parseSingleRecord - parse the returned property record object
+* @param {object} record - the record object returned from SODA
+* @return {object} the record from @param with our "latest_" properties added
+*/
+function parseSingleRecord(record){
+  if (record.parcel_s === undefined) {return null}
+  if (! record.hasOwnProperty('property_type_self_selected') ) { record.property_type_self_selected = 'N/A'}
+  record.parcel1 = BLK.exec(record.parcel_s)[1]
+  record.parcel2 = LOT.exec(record.parcel_s)[1]
+  record.blklot = '' + record.parcel1 + record.parcel2
+  record.ID = '' + record.blklot
+  METRICS.forEach(function (metric) {
+    record = latest(metric, record)
   })
-  activePropertyTable(blockLot)
-  chartHistogram.call(histogramHighlight, blockLot.latest_energy_star_score)
-  chartStackedBar.call(stackedBarHighlight, blockLot.latest_site_eui_kbtu_ft2)
-  chartBubble.call(bubblesHighlight, {x:blockLot.latest_site_eui_kbtu_ft2, y:blockLot.latest_total_ghg_emissions_metric_tons_co2e, r:blockLot.floor_area})
-  // mapHighlight(newBlockLot)
-
-})
-
-/* parseData() should be shared between map.js & dashboard.js */
-function parseData (apiData) {
-  var metrics = ['benchmark','energy_star_score','site_eui_kbtu_ft2','source_eui_kbtu_ft2','percent_better_than_national_median_site_eui','percent_better_than_national_median_source_eui','total_ghg_emissions_metric_tons_co2e','total_ghg_emissions_intensity_kgco2e_ft2','weather_normalized_site_eui_kbtu_ft2','weather_normalized_source_eui_kbtu_ft2']
-  var re1 = /(.+)\//
-  var re2 = /[\/\.](.+)/
-  var spliceArray = []
-  apiData.forEach(function (parcel, index) {
-    if (parcel.parcel_s === undefined) {spliceArray.unshift(index); return parcel}
-    if (! parcel.hasOwnProperty('property_type_self_selected') ) { parcel.property_type_self_selected = 'N/A'}
-    parcel.parcel1 = re1.exec(parcel.parcel_s)[1]
-    parcel.parcel2 = re2.exec(parcel.parcel_s)[1]
-    parcel.blklot = '' + parcel.parcel1 + parcel.parcel2
-    parcel.ID = '' + parcel.blklot
-    metrics.forEach(function (test) {
-      parcel = latest(test, parcel)
-    })
-    return parcel
-  })
-  /* remove elements that have no parcel identifier */
-  spliceArray.forEach(function (el) {
-    apiData.splice(el,1)
-  })
-  return apiData
+  return record
 }
 
-function latest (test, entry) {
+/**
+* latest - loop through a single parcel to find the latest data
+* @param {string} metric - the parcel metric being recorded
+* @param {object} entry - the parcel record object
+* @return {object} - the entry param with new "latest_" properties
+*/
+function latest (metric, entry) {
+  //TODO: create [years] dynamically based on the current year?
   var years = [2011,2012,2013,2014,2015]
-  if (test === 'benchmark') years.unshift(2010)
+  if (metric === 'benchmark') years.unshift(2010)
   var yearTest = years.map(function(d){
-    if (test === 'benchmark') return 'benchmark_' + d + '_status'
-    else return '_' + d + '_' + test
+    if (metric === 'benchmark') return 'benchmark_' + d + '_status'
+    else return '_' + d + '_' + metric
   })
   yearTest.forEach(function(year,i){
     if (entry[year] != null){
-      entry['latest_'+test] = entry[year]
-      entry['latest_'+test+'_year'] = years[i]
+      entry['latest_'+metric] = entry[year]
+      entry['latest_'+metric+'_year'] = years[i]
     }
     else {
-      entry['latest_'+test] = entry['latest_'+test] || 'N/A'
-      entry['latest_'+test+'_year'] = entry['latest_'+test+'_year'] || 'N/A'
+      entry['latest_'+metric] = entry['latest_'+metric] || 'N/A'
+      entry['latest_'+metric+'_year'] = entry['latest_'+metric+'_year'] || 'N/A'
     }
   })
   return entry
 }
 
-function apiDataToArray (prop, categoryFilter) {
-  var arr = returnedApiData
-  if (categoryFilter && categoryFilter !== 'All') {
-    arr = arr.filter(function(parcel){
-      return parcel.property_type_self_selected === categoryFilter
-    })
-  }
-  arr = arr.map(function (parcel) {
+/**
+* apiDataToArray - transform record array to get a simpler, standardized array of k-v pairs
+* @param {array} data - the input array of data records
+* @return {array} an array of objects only latest_energy_star_score, latest_total_ghg_emissions_metric_tons_co2e, latest_weather_normalized_site_eui_kbtu_ft2
+*/
+function apiDataToArray (data) {
+  let arr = data.map((parcel)=>{
     // if ( typeof parcel != 'object' || parcel === 'null' ) continue
-    var onlyNumbers = (typeof parseInt(parcel[prop]) === 'number' && !isNaN(parcel[prop])) ? parseInt(parcel[prop]) : -1
-    return {id: parcel.ID, value: onlyNumbers}
+    let res = {id: parcel.ID}
+    LIMITEDMETRICS.forEach(metric=>{
+        res[metric] = (typeof parseInt(parcel[metric]) === 'number' && !isNaN(parcel[metric])) ? parseInt(parcel[metric]) : -1
+    })
+    return res
   })
   return arr
 }
 
-function apiDataToXYR (xProp, yProp, rProp, categoryFilter) {
-  var arr = returnedApiData
-  if (categoryFilter && categoryFilter !== 'All') {
-    arr = arr.filter(function(parcel){
-      return parcel.property_type_self_selected === categoryFilter
-    })
-  }
-  /* filter out values that don't exist */
-  arr = arr.filter(function (parcel) {
-    var thisparcel = [onlyNumbers(parcel[xProp]), onlyNumbers(parcel[yProp]), onlyNumbers(parcel[rProp])]
-    return thisparcel.every(function (el) {return el > 0})
+
+
+// /**
+// * digestData - reduces data from api into summary form
+// */
+// function digestData (categoryFilter) {
+//   var arr = returnedApiData
+//   if (categoryFilter && categoryFilter !== 'All') {
+//     arr = arr.filter(function(parcel){
+//       return parcel.property_type_self_selected === categoryFilter
+//     })
+//   }
+//   var result = arr.reduce(function (prev, curr) {
+//     // # of Properties
+//     // SF of floor area
+//     // Energy Like for Like 2013-2014 (418 properties)
+//     // Total GHG Emissions (MT CO2e)
+//     // Compliance Rate
+//     return {
+//       count: prev.count + 1,
+//       floor_area: prev.floor_area + +curr.floor_area,
+//       total_ghg: (isNaN(+curr.latest_total_ghg_emissions_metric_tons_co2e)) ? prev.total_ghg : prev.total_ghg + +curr.latest_total_ghg_emissions_metric_tons_co2e,
+//       compliance: (curr.latest_benchmark === 'Complied') ? prev.compliance + 1 : prev.compliance
+//     }
+//   }, {count:0,floor_area:0,total_ghg:0,compliance:0})
+//   result.compliance = roundToTenth(100*(result.compliance/result.count))
+//   result.total_ghg = roundToTenth(result.total_ghg)
+//   result.type = categoryFilter
+//   return result
+// }
+
+/**
+* populateInfoBoxes - brute force put returned data into infoboxes on the page
+* @param {object} singleBuildingData - data for a single building
+* @param {object} categoryData - data for the single building's category
+* @param {object} floorAreaRange - floor area range for this category
+* @return null
+*/
+function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
+  d3.select('#building-energy-star-score').text(singleBuildingData.latest_energy_star_score)
+  d3.select('#building-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
+  d3.selectAll('.building-ghg-emissions ').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
+  d3.selectAll('.building-type').text(singleBuildingData.property_type_self_selected)
+  d3.select('#building-floor-area').text(numberWithCommas(singleBuildingData.floor_area))
+  // d3.selectAll('.foo-building-compliance').text(singleBuildingData.)
+  d3.selectAll('.building-name').text(singleBuildingData.building_name)
+  d3.select('#building-street-address').text(singleBuildingData.building_address)
+  d3.select('#building-city-address').text(
+    singleBuildingData.full_address_city + ' ' +
+    singleBuildingData.full_address_state + ', ' +
+    singleBuildingData.full_address_zip + ' '
+  )
+  d3.selectAll('.building-type-sq-ft').text(numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]))
+
+  let euirank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
+  d3.select('#building-ranking').text(euirank[0])
+  d3.select('#total-building-type').text(euirank[1])
+
+  //TODO: change #local-ranking-tooltip
+  // the following doesn't quite work:
+  // d3.select("#local-ranking-tooltip").attr("title","Based on score and energy use intensity, " + singleBuildingData.building_name +"'s energy use ranks #" + euirank[0] +" out of " + euirank[0] + " " + singleBuildingData.property_type_self_selected + " buildings sized between " + numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]) + " square feet.")
+}
+
+/**
+* rankBuildings - ranking algorithim, dumb sort for now
+* @param {string} id - building "ID" number
+* @param {array} bldgArray - processed/simplified building data
+* @param {string} prop - the property to rank by
+* @return {array} [rank, count]
+*/
+function rankBuildings (id, bldgArray, prop) {
+  //TODO: rank the buildings in te
+  let sorted = bldgArray.sort(function(a,b){
+    return +a[prop] - +b[prop]
   })
-  /* make the simplified xyr data array */
-  arr = arr.map(function (parcel) {
-    return { id: parcel.ID, x: +parcel[xProp], y: +parcel[yProp], r: +parcel[rProp] }
-  })
-  return arr
+
+  let rank = sorted.findIndex(function(el){return el.id === id}) + 1
+  let count = sorted.length
+
+  return [rank, count]
 }
 
-function digestData (categoryFilter) {
-  var arr = returnedApiData
-  if (categoryFilter && categoryFilter !== 'All') {
-    arr = arr.filter(function(parcel){
-      return parcel.property_type_self_selected === categoryFilter
-    })
-  }
-  var result = arr.reduce(function (prev, curr) {
-    // # of Properties
-    // SF of floor area
-    // Energy Like for Like 2013-2014 (418 properties)
-    // Total GHG Emissions (MT CO2e)
-    // Compliance Rate
-    return {
-      count: prev.count + 1,
-      floor_area: prev.floor_area + +curr.floor_area,
-      total_ghg: (isNaN(+curr.latest_total_ghg_emissions_metric_tons_co2e)) ? prev.total_ghg : prev.total_ghg + +curr.latest_total_ghg_emissions_metric_tons_co2e,
-      compliance: (curr.latest_benchmark === 'Complied') ? prev.compliance + 1 : prev.compliance
-    }
-  }, {count:0,floor_area:0,total_ghg:0,compliance:0})
-  result.compliance = roundToTenth(100*(result.compliance/result.count))
-  result.total_ghg = roundToTenth(result.total_ghg)
-  result.type = categoryFilter
-  return result
-}
 
-function digestTable (digest) {
-  d3.select('#table-type').html(digest.type)
-  d3.select('#table-count').html(numberWithCommas(digest.count))
-  d3.select('#table-floor_area').html(numberWithCommas(digest.floor_area) + ' ft<sup>2</sup>')
-  d3.select('#table-total_ghg').html(numberWithCommas(digest.total_ghg) + ' MT CO<sub>2</sub>')
-  d3.select('#table-compliance').html(digest.compliance + '%')
-}
-
-function activePropertyTable (blockLot) {
-  var tablehtml = '<dl class="dl-horizontal">'
-     tablehtml += '<dt>Address</dt><dd>' + blockLot.building_address + '</dd>'
-     tablehtml += '<dt>Building Type</dt><dd>' + blockLot.property_type_self_selected + '</dd>'
-     tablehtml += '<dt>Latest Benchmark Year</dt><dd>' + blockLot.latest_benchmark_year + '</dd>'
-     tablehtml += '<dt>Energy Star Score</dt><dd>' + blockLot.latest_energy_star_score + '</dd>'
-     tablehtml += '<dt>Site EUI</dt><dd>' + blockLot.latest_site_eui_kbtu_ft2 + ' kbtu/ft<sup>2</sup></dd>'
-     tablehtml += '<dt>GHG Emissions</dt><dd>' + blockLot.latest_total_ghg_emissions_metric_tons_co2e + ' MT CO<sub>2</sub></dd>'
-     tablehtml += '<dt>Floor Area</dt><dd>' + numberWithCommas(blockLot.floor_area) + ' ft<sup>2</sup></dd>'
-     tablehtml += '</dl>'
-
-  $('#active-property').html(tablehtml)
-
-}
-
+/****** helper functions *******/
 function onlyNumbers (val) {
   return (typeof parseInt(val) === 'number' && !isNaN(val)) ? parseInt(val) : -1
 }
 
-function objArrayToSortedNumArray (objArray) {
-  return objArray.map(function (el){ return el.value }).sort(function (a,b) { return a - b })
+function objArrayToSortedNumArray (objArray,prop) {
+  return objArray.map(function (el){ return el[prop] }).sort(function (a,b) { return a - b })
 }
 
-function histogramHighlight (selection, data) {
-  if( isNaN(data) ) data = -100
-  var x = histogram.xScale(),
-      y = histogram.yScale(),
-      margin = histogram.margin(),
-      width = histogram.width(),
-      height = histogram.height()
-  var svg = selection.select('svg')
-  var hl = svg.select("g").selectAll('.highlight').data([data])
-  hl.enter().append("rect").attr('class', 'highlight')
-  hl.attr("width", 2)
-    .attr("x", function(d) { return x(d) })
-    .attr("y", 1)
-    .attr("height", height - margin.top - margin.bottom )
-    .attr('fill', colorSwatches.highlight )
-  hl.exit().remove()
-}
-
-// function mapHighlight (selection, data) {
-//   if( isNaN(data) ) data = -100
-//
-//
+// function anyPropNA (obj) {
+//   var result = false
+//   for (var prop in obj) {
+//     if (obj[prop] === "N/A") result = true
+//   }
+//   return result
 // }
 
-function stackedBarHighlight (selection, data) {
+// function sortNumber (a,b) {
+//   return a - b;
+// }
+
+// function roundToTenth (num){
+//   return Math.round(10*num)/10
+// }
+
+function numberWithCommas(x) {
+    var parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+}
+
+function histogramHighlight (selection, data, chart) {
   if( isNaN(data) ) data = -100
-  var x = stackedBar.xScale(),
-      y = stackedBar.yScale(),
-      margin = stackedBar.margin(),
-      width = stackedBar.width(),
-      height = stackedBar.height()
+  var x = chart.xScale(),
+      y = chart.yScale(),
+      margin = chart.margin(),
+      width = chart.width(),
+      height = chart.height()
   var svg = selection.select('svg')
   var hl = svg.select("g").selectAll('.highlight').data([data])
   hl.enter().append("rect").attr('class', 'highlight')
@@ -489,37 +524,22 @@ function stackedBarHighlight (selection, data) {
   hl.exit().remove()
 }
 
-function bubblesHighlight (selection, data) {
-   if( anyPropNA(data) ) data = { x:-100, y:-100, r:0 } // if any property of data is 'N/A', give default
-  var x = bubbles.xScale(),
-      y = bubbles.yScale(),
-      r = bubbles.rScale(),
-      margin = bubbles.margin(),
-      width = bubbles.width(),
-      height = bubbles.height()
+function stackedBarHighlight (selection, data, chart) {
+  if( isNaN(data) ) data = -100
+  var x = chart.xScale(),
+      y = chart.yScale(),
+      margin = chart.margin(),
+      width = chart.width(),
+      height = chart.height()
   var svg = selection.select('svg')
   var hl = svg.select("g").selectAll('.highlight').data([data])
-  hl.enter().append("circle").attr('class', 'highlight')
-  hl.attr("r", function(d) { return r(d.r); })
-      .attr("cx", function(d) { return x(d.x); })
-      .attr("cy", function(d) { return y(d.y); })
-      .attr('fill', function(d) { return color.source_eui_kbtu_ft2(d.x) })
-      .attr('fill-opacity', 1)
-      .attr('stroke', colorSwatches.highlight)
-      .attr('stroke-width', '2px')
+  hl.enter().append("rect").attr('class', 'highlight')
+  hl.attr("width", 2)
+    .attr("x", function(d) { return x(d) })
+    .attr("y", 1)
+    .attr("height", height - margin.top - margin.bottom )
+    .attr('fill', colorSwatches.highlight )
   hl.exit().remove()
-}
-
-function anyPropNA (obj) {
-  var result = false
-  for (var prop in obj) {
-    if (obj[prop] === "N/A") result = true
-  }
-  return result
-}
-
-function sortNumber (a,b) {
-  return a - b;
 }
 
 function arrayQuartiles (sortedArr) {
@@ -529,55 +549,3 @@ function arrayQuartiles (sortedArr) {
     d3.quantile(sortedArr,0.75)
   ]
 }
-
-function roundToTenth (num){
-  return Math.round(10*num)/10
-}
-
-function numberWithCommas(x) {
-    var parts = x.toString().split(".");
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return parts.join(".");
-}
-
-function windowResize() {
-    // update width
-    width = parseInt(d3.select('#chart-histogram').style('width'), 10);
-    // do the actual resize...
-    histogram.width(width)
-    stackedBar.width(width)
-    bubbles.width(width)
-
-    chartHistogram.call(histogram)
-    chartStackedBar.call(stackedBar)
-    chartBubble.call(bubbles)
-
-}
-
-//*******************************************
-/* CATEGORY FILTER DROPDOWN
-/********************************************/
-
-// populate single category select dropdown menu
-var filterOptions = '<li><a id="show-filter-options-modal" href="#">';
-for (var i=0;i < categoryFilters.length;i++) {
-    filterOptions += '<li><a href="#">'+categoryFilters[i]+'</a></li>';
-}
-$("#category-filters-dropdown").html(filterOptions);
-
-// update active class + button label
-$('.category-dropdown .dropdown-menu li').click(function() {
-    // $('#filters .category-dropdown .dropdown-menu li:first-child').removeClass('active');
-    $('.category-dropdown .dropdown-menu li').removeClass('active');
-    $(this).toggleClass('active');
-
-    var category = $(this).first().text();
-    if (category.length > 18) {
-      isEllipse = "...";
-    } else {
-      isEllipse = "";
-    }
-
-    // upon select, update dropdown-toggle label
-    $(".category-dropdown small").html(category.substring(0,18)+isEllipse);
-});

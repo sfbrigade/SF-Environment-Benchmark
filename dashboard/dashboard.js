@@ -231,6 +231,15 @@ function handlePropertyTypeResponse(rows) {
   let estarVals = objArrayToSortedNumArray(categoryData, 'latest_energy_star_score')
   estarVals = estarVals.filter(function (d) { return d > 0 })
 
+  let estarMean = d3.mean(estarVals)
+  let estarStdDev = d3.deviation(estarVals)
+
+  categoryData = categoryData.map((row)=>{
+    // http://stattrek.com/statistics/dictionary.aspx?definition=z%20score
+    row.zscoreVal = (row.latest_energy_star_score - estarMean) / estarStdDev
+    return row
+  })
+
   let ghgVals = objArrayToSortedNumArray(categoryData, 'latest_total_ghg_emissions_metric_tons_co2e')
   ghgVals = ghgVals.filter(function (d) { return d > 0 })
 
@@ -430,7 +439,7 @@ function apiDataToArray (data) {
 */
 function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.selectAll('.foo-num-estar-score').text(singleBuildingData.latest_energy_star_score)
-  d3.selectAll('.foo-num-local-zscore').text(singleBuildingData.zscoreVal)
+  d3.selectAll('.foo-num-local-zscore').text(objArrayToSortedNumArray(categoryData, 'zscoreVal'))
   d3.selectAll('.foo-num-site-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
   d3.selectAll('.foo-num-ghg-emissions').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
   d3.selectAll('.foo-building-type').text(singleBuildingData.property_type_self_selected)

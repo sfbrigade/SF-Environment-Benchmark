@@ -446,7 +446,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   )
   d3.selectAll('.building-type-sq-ft').text(numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]))
 
-  let zscorerank = rankBuildings(singleBuildingData.ID, categoryData, 'zscoreVal')
+  let zscorerank = rankBuildings(singleBuildingData.ID, categoryData, 'zscoreVal', 'latest_site_eui_kbtu_ft2')
   d3.select('#building-ranking').text(zscorerank[0])
   d3.select('#total-building-type').text(zscorerank[1])
 
@@ -462,10 +462,13 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
 * @param {string} prop - the property to rank by
 * @return {array} [rank, count]
 */
-function rankBuildings (id, bldgArray, prop) {
+function rankBuildings (id, bldgArray, prop1, prop2) {
   //TODO: rank the buildings in te
   let sorted = bldgArray.sort(function(a,b){
-    return +a[prop] - +b[prop]
+    if ( +a[prop1] != +b[prop1] ) { return +a[prop1] - +b[prop1]
+    } else {
+      return +a[prop2] - +b[prop2]
+    }
   })
 
   let rank = sorted.findIndex(function(el){return el.id === id}) + 1

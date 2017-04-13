@@ -446,7 +446,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   )
   d3.selectAll('.building-type-sq-ft').text(numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]))
 
-  let zscorerank = rankBuildings(singleBuildingData.ID, categoryData, 'zscoreVal', 'latest_site_eui_kbtu_ft2')
+  let zscorerank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_energy_star_score', 'latest_site_eui_kbtu_ft2')
   d3.select('#building-ranking').text(zscorerank[0])
   d3.select('#total-building-type').text(zscorerank[1])
 
@@ -464,11 +464,11 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
 */
 function rankBuildings (id, bldgArray, prop1, prop2) {
   //TODO: rank the buildings in te
-  let sorted = bldgArray.sort(function(a,b){
-    if ( +a[prop1] != +b[prop1] ) { return +a[prop1] - +b[prop1]
-    } else {
+  let sorted = bldgArray.sort(function(a,b){ // https://www.sitepoint.com/sophisticated-sorting-in-javascript/
+    if ( +a[prop1] === +b[prop1] ) {
       return +a[prop2] - +b[prop2]
     }
+    return +a[prop1] - +b[prop1] 
   })
 
   let rank = sorted.findIndex(function(el){return el.id === id}) + 1

@@ -1,5 +1,8 @@
+html, body {
+	height: 100vh;
+}
 body {
-	font-family: 'Open Sans', sans-serif;
+	font-family: Futura, "Trebuchet MS", Arial, sans-serif;
 	line-height: 24px;
 	padding-top: 60px;
 	padding-right: 0;
@@ -15,7 +18,7 @@ body {
 	padding-left: 10px;
 }
 .navbar-brand>img {
-	width: 85%;
+	width: 17em;
 }
 .nav-pills>li>a {
 	color: gray;
@@ -27,10 +30,10 @@ body {
 	color: black;
 	font-weight: bold;
 	border-radius: 0;
-	border-top: 5px solid #9AE77F;
+	border-top: 5px solid #008163;
 }
 .nav-pills>li {
-	background-color: #f5f5f5;
+	background-color: #E5E8E5;
 	color: gray;
 	width: 33.15%;
 	font-size: 14px;
@@ -80,6 +83,7 @@ a {
     border: none;
     padding-top: 6%;
     background-color: #FBFCFA;
+    height: 100vh;
 }
 .building-name.side {
 	font-size: 26px;
@@ -105,7 +109,7 @@ body {
 	margin: 0;
 }
 .navbar {
-	background: linear-gradient(90deg, #81C56A 0%, #73BE63 100%);
+	background: linear-gradient(90deg, #E5E8E5 0%, #E5E8E5 100%);
 	color: white;
 	-webkit-box-shadow: 0 8px 6px -6px #999;
     -moz-box-shadow: 0 8px 6px -6px #999;
@@ -118,14 +122,14 @@ body {
 	font-size: 16px;
 }
 .dashboard-header.ranking {
-	color: #81C16B;
+	color: #008163;
 }
 .chart-title {
 	padding: 6%;
 	font-size: 14px;
 	color: #0C0C0C;
 	letter-spacing: 1.2px;
-	font-weight: 600;
+	/*font-weight: 600;*/
 }
 .ranking-text {
 	padding: 6%;
@@ -169,7 +173,7 @@ body {
 	padding-top: 20%;
 }
 .btn-lg {
-	background-color: #FF8C29;
+	background-color: #E07F48;
 	border: none;
 	border-radius: 33px;
 	font-size: 16px;
@@ -227,7 +231,7 @@ h5 {
 	padding-left: 1px;
 }
 .links {
-	padding: 8%;
+	padding: 6%;
 }
 .link {
 	padding-top: 2%;
@@ -270,7 +274,7 @@ h5 {
 	border-left: 1px solid lightgray;
 }
 .border-bottom {
-	border-bottom: 1px solid #EEEEEE;
+	border-bottom: 1px dotted darkgray;
 }
 .ranking {
 	width: 164px;
@@ -278,10 +282,11 @@ h5 {
 	font-size: 14px;
 	text-align: center;
 	line-height: 18px;
-	color: #81C16B;
+	color: #008163;
 }
 .panel-bottom {
-	padding: 0;
+	padding: 4%;
+	border-top: 1px dotted darkgray;
 }
 .glyphicon-question-sign:before {
 	padding-left: 5px;
@@ -290,10 +295,6 @@ h5 {
 
 /* charts */
 
-.histogram-chart, .chart-stackedbar {
-	padding-top: 8%;
-	width: ;
-}
 .chart-stackedbar {
 	padding-bottom: 7%;
 }

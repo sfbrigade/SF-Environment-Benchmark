@@ -282,8 +282,8 @@ function handlePropertyTypeResponse(rows) {
 
   /* variables for the ring chart */
   var ringRange = [0,100];
-  var ringHeight = 200;
-  var ringWidth = 200;
+  var ringHeight = 150;
+  var ringWidth = 150;
 
   /**
    * Use c3.js for ring chart
@@ -302,12 +302,12 @@ function handlePropertyTypeResponse(rows) {
        label: {
           show:false, // to turn off the min/max labels.
           format: function(value, ratio) {
-              return value + ' out of ' + ringRange[1];
+            return value + ' out of ' + ringRange[1];
           }
        },
        min: ringRange[0], // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change
        max: ringRange[1],
-       width: 20, // for adjusting arc thickness
+       width: 14, // for adjusting arc thickness
        startingAngle: 0,
        fullCircle: true
      },
@@ -322,7 +322,7 @@ function handlePropertyTypeResponse(rows) {
      size: {
          height: ringHeight,
          width: ringWidth
-     }
+    }
   });
 
   ringChart.load({

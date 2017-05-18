@@ -276,6 +276,15 @@ function handlePropertyTypeResponse(rows) {
   let estarVals = objArrayToSortedNumArray(categoryData, 'latest_energy_star_score')
   estarVals = estarVals.filter(function (d) { return d > 0 })
 
+  let estarMean = d3.mean(estarVals)
+  let estarStdDev = d3.deviation(estarVals)
+
+  categoryData = categoryData.map((row)=>{ 
+    // http://stattrek.com/statistics/dictionary.aspx?definition=z%20score
+    row.zscoreVal = (row.latest_energy_star_score - estarMean) / estarStdDev
+    return row
+  })
+
   let ghgVals = objArrayToSortedNumArray(categoryData, 'latest_total_ghg_emissions_metric_tons_co2e')
   ghgVals = ghgVals.filter(function (d) { return d > 0 })
 
@@ -287,15 +296,6 @@ function handlePropertyTypeResponse(rows) {
   color.energy_star_score.domain(estarQuartiles)
   color.total_ghg_emissions_intensity_kgco2e_ft2.domain(arrayQuartiles(ghgVals))
   color.site_eui_kbtu_ft2.domain(arrayQuartiles(euiVals))
-
-  /** Calculate z-score (Wasted a lot of time trying to get JS libs to work here, seems to be a lot easer to
-  *                      explicitly calculat it--admittedly, it could be me as I'm not super JavaScript savvy)
-  *       Libraries explored:
-  *         - jStat: https://github.com/jstat/jstat
-  *         - simple-statistics: https://github.com/simple-statistics/simple-statistics
-  */
-  // categoryData.zscoreVal = jstat.zscore(singleBuildingData.latest_energy_star_score, estarVals)
-  categoryData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
 
   /* draw histogram for energy star */
   estarHistogram.colorScale(color.energy_star_score).bins(100).xAxisLabel('Energy Star Score').yAxisLabel('Buildings')
@@ -496,9 +496,9 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   )
   d3.selectAll('.building-type-sq-ft').text(numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]))
 
-  let euirank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
-  d3.select('#building-ranking').text(euirank[0])
-  d3.select('#total-building-type').text(euirank[1])
+  let zscorerank = rankBuildings(singleBuildingData.ID, categoryData, 'zscoreVal', 'latest_site_eui_kbtu_ft2')
+  d3.select('#building-ranking').text(zscorerank[0])
+  d3.select('#total-building-type').text(zscorerank[1])
 
   //TODO: change #local-ranking-tooltip
   // the following doesn't quite work:
@@ -516,10 +516,13 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
 * @param {string} prop - the property to rank by
 * @return {array} [rank, count]
 */
-function rankBuildings (id, bldgArray, prop) {
+function rankBuildings (id, bldgArray, prop1, prop2) {
   //TODO: rank the buildings in te
   let sorted = bldgArray.sort(function(a,b){
-    return +a[prop] - +b[prop]
+    if ( +a[prop1] != +b[prop1] ) { return +a[prop1] - +b[prop1]
+    } else {
+      return +a[prop2] - +b[prop2]
+    }
   })
 
   let rank = sorted.findIndex(function(el){return el.id === id}) + 1

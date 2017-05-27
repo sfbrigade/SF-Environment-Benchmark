@@ -23,7 +23,7 @@ var colorSwatches = {
       energy_star_score: ['#EF839E','#ECD68C','#80D9AF','#4FAD8E'],
       total_ghg_emissions_intensity_kgco2e_ft2: ['#4FAD8E', '#80D9AF', '#ECD68C', '#EF839E'],
       site_eui_kbtu_ft2: ['#4FAD8E','#80D9AF', '#ECD68C', '#EF839E'],
-      highlight: '#ff00fc'
+      highlight: '#0d32d4'
     };
 
 var color = {
@@ -571,9 +571,9 @@ function histogramHighlight (selection, data, chart) {
   var hl = svg.select("g").selectAll('.highlight').data([data])
   hl.enter().append("rect").attr('class', 'highlight')
   hl.attr("width", 2)
-    .attr("x", function(d) { return x(d) })
-    .attr("y", 1)
-    .attr("height", height - margin.top - margin.bottom )
+    .attr("x", function(d) { return x(d) - 1 })
+    .attr("y", 0 )
+    .attr("height", height )
     .attr('fill', colorSwatches.highlight )
   hl.exit().remove()
 }
@@ -589,9 +589,9 @@ function stackedBarHighlight (selection, data, chart) {
   var hl = svg.select("g").selectAll('.highlight').data([data])
   hl.enter().append("rect").attr('class', 'highlight')
   hl.attr("width", 2)
-    .attr("x", function(d) { return x(d) })
-    .attr("y", 1)
-    .attr("height", height - margin.top - margin.bottom )
+    .attr("x", function(d) { return x(d) - 1 })
+    .attr("y", 0)
+    .attr("height", height )
     .attr('fill', colorSwatches.highlight )
   hl.exit().remove()
 }

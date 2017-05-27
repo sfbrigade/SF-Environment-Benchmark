@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="31px" height="38px" viewBox="0 0 31 38" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>hotel-icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="hotel-icon" transform="translate(-3.000000, 0.000000)">
+            <g transform="translate(3.000000, 0.000000)">
+                <g>
+                    <path d="M0,4.95932124 C0,3.51425339 1.1744951,2.34279444 2.62509508,2.34279444 L9.42394862,2.34279444 L9.42394862,1.30839105 C9.42394862,0.585786627 10.0110401,-1.83394111e-17 10.736149,1.31514047e-17 L19.9506204,4.13327472e-16 C20.6753286,4.44800889e-16 21.2628208,0.591185961 21.2628208,1.30839105 L21.2628208,2.34279444 L28.3778057,2.34279444 C29.8260036,2.34279444 31,3.50737472 31,4.95932124 L31,37.3448276 L0,37.3448276 L0,4.95932124 Z M11,30.9568966 L11,37.3448276 L20,37.3448276 L20,30.9568966 L11,30.9568966 Z" id="Combined-Shape" fill="#EBEBEB"></path>
+                    <g id="Group-2" transform="translate(5.000000, 7.862069)" fill="#FBFCFA">
+                        <rect id="Rectangle-4" x="0" y="0" width="3.5" height="4.29956897"></rect>
+                        <rect id="Rectangle-4" x="6" y="0" width="3.5" height="4.29956897"></rect>
+                        <rect id="Rectangle-4" x="12" y="0" width="3.5" height="4.29956897"></rect>
+                        <rect id="Rectangle-4" x="18" y="0" width="3.5" height="4.29956897"></rect>
+                        <rect id="Rectangle-4" x="0" y="9.82758621" width="3.5" height="4.29956897"></rect>
+                        <rect id="Rectangle-4" x="6" y="9.82758621" width="3.5" height="4.29956897"></rect>
+                        <rect id="Rectangle-4" x="12" y="9.82758621" width="3.5" height="4.29956897"></rect>
+                        <rect id="Rectangle-4" x="18" y="9.82758621" width="3.5" height="4.29956897"></rect>
+                    </g>
+                    <path d="M8.58170414,29.2418723 C8.81272256,28.5607662 9.51418345,27.7186019 10.1526484,27.3974929 C10.1526484,27.3974929 12.1702056,26.0431034 15.4371679,26.0431034 C18.7041302,26.0431034 20.8314853,27.4082207 20.8314853,27.4082207 C21.4768381,27.7398125 22.1880924,28.5631688 22.4182959,29.2418723 L23,30.9568966 L8,30.9568966 L8.58170414,29.2418723 Z" id="Rectangle-3" fill="#DCDCDC"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

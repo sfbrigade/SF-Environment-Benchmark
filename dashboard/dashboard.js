@@ -1,5 +1,15 @@
 "use strict";
 
+  $('.panel-body.side.flex-grow').height('800px');
+
+  $('.nav.nav-pills li a').on('click', function() {
+    if (($(this).is('#eui-tab')) || ($(this).is('#ghg-tab'))) {
+      $('.panel-body.side.flex-grow').height('');
+    } else {
+      $('.panel-body.side.flex-grow').height('800px');
+    }
+  });
+
 //TODO: CHANGE limit on returned properties in function propertyTypeQuery()
 const DATASOURCE = '75rg-imyz' // 'j2j3-acqj'
 const METRICS = ['benchmark','energy_star_score','site_eui_kbtu_ft2','source_eui_kbtu_ft2','percent_better_than_national_median_site_eui','percent_better_than_national_median_source_eui','total_ghg_emissions_metric_tons_co2e','total_ghg_emissions_intensity_kgco2e_ft2','weather_normalized_site_eui_kbtu_ft2','weather_normalized_source_eui_kbtu_ft2']
@@ -10,9 +20,9 @@ const LOT = /[\/\.](.+)/
 /* glogal reference objects */
 /* colorSwatches should be shared between map.js & dashboard.js */
 var colorSwatches = {
-      energy_star_score: ['#FD6C16','#FEB921','#46AEE6','#134D9C'],
-      total_ghg_emissions_intensity_kgco2e_ft2: ['#f4fde8','#b6e9ba','#76cec7','#3ea3d3'],
-      site_eui_kbtu_ft2: ['#134D9C','#46AEE6', '#FEB921', '#FD6C16'],
+      energy_star_score: ['#EF839E','#ECD68C','#80D9AF','#4FAD8E'],
+      total_ghg_emissions_intensity_kgco2e_ft2: ['#4FAD8E', '#80D9AF', '#ECD68C', '#EF839E'],
+      site_eui_kbtu_ft2: ['#4FAD8E','#80D9AF', '#ECD68C', '#EF839E'],
       highlight: '#ff00fc'
     };
 
@@ -90,20 +100,22 @@ for (let category in groups){
 
 
 /* page elements */
-var estarHistogramElement = d3.select('#estar-histogram')
-var width = 500 //parseInt(estarHistogramElement.style('width'))
+var estarHistogramElement = d3.select('#energy-star-score-histogram')
+var estarWidth = 500 //parseInt(estarHistogramElement.style('width'))
 var estarHistogram = histogramChart()
-  .width(width)
+  .width(estarWidth)
   .height(200)
   .range([0,104])
   .bins(50)
   .tickFormat(d3.format(',d'))
 
-var ghgHistogramElement = d3.select('#ghg-histogram')
-var width = 500 //parseInt(ghgHistogramElement.style('width'))
+var ghgHistogramElement = d3.select('#ghg-emissions-histogram')
+var ghgWidth = 500 //parseInt(ghgHistogramElement.style('width'))
 var ghgHistogram = histogramChart()
-  .width(width)
+  .width(ghgWidth)
   .height(200)
+  .range([0,1650])
+  .bins(100)
   .tickFormat(d3.format(',d'))
 
 var euiChartElement = d3.select('#eui-stackedbar')
@@ -119,13 +131,36 @@ let categoryData
 let floorAreaRange
 
 
-if(! offline){
-  propertyQuery( 1, {parcel_s: '3721/014'}, null, handleSingleBuildingResponse )
-}else{
-    handleSingleBuildingResponse(offline.single)
+// if(! offline){
+  var urlVars = getUrlVars();
+  if (urlVars.apn == undefined){
+      console.error("Not a valid APN")
+      //TODO: alert the user
+  } else {
+    // APN numbers look like 3721/014 and come from SF Open Data --
+    // -- see example: https://data.sfgov.org/Energy-and-Environment/Existing-Commercial-Buildings-Energy-Performance-O/j2j3-acqj
+    console.log("Trying APN: " + urlVars['apn']);
+    $('#view-welcome').addClass('hidden')
+    $('#view-load').removeClass('hidden')
+    propertyQuery( 1, {parcel_s: urlVars['apn']}, null, handleSingleBuildingResponse )
+  }
+// }else{
+//     handleSingleBuildingResponse(offline.single)
+// }
+
+
+// Get URL parameters
+// see also: http://snipplr.com/view/19838
+// Usage: `map = getUrlVars()` while at example.html?foo=asdf&bar=jkls
+// sets map['foo']='asdf' and map['bar']='jkls'
+function getUrlVars() {
+  var vars = {};
+  window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,
+    function(m,key,value) {
+      vars[key] = value;
+    });
+  return vars;
 }
-
-
 
 
 
@@ -208,16 +243,26 @@ function propertyQuery(limit, whereparams, soqlQuery, handler) {
 * @param {array} rows - returned from consumer.query.getRows, expects rows.length === 0
 */
 function handleSingleBuildingResponse(rows) {
+  if (typeof rows[0] == 'undefined') {
+    return $('#view-load').html('The record for the chosen building was not found')
+  }
   singleBuildingData = parseSingleRecord(rows[0]) //save data in global var
 
   let type = singleBuildingData.property_type_self_selected
-  // let minMax = ts.invertExtent(ts(+singleBuildingData.floor_area))
-  let minMax = groups[type].scale.invertExtent(groups[type].scale(+singleBuildingData.floor_area))
-  floorAreaRange = minMax
-  if(! offline){
-    propertyQuery( null, null, formQueryString({where: whereArray( type, minMax )}), handlePropertyTypeResponse )
+
+  /* check to see if  the returned building is one of our supported building types */
+  if (Object.keys(groups).indexOf(type) == -1) {
+    console.error("not a supported building type");
+    $('#view-load').html('The chosen building type is not supported by this dashboard interface')
   } else {
-    handlePropertyTypeResponse(offline.multiple)
+    // let minMax = ts.invertExtent(ts(+singleBuildingData.floor_area))
+    let minMax = groups[type].scale.invertExtent(groups[type].scale(+singleBuildingData.floor_area))
+    floorAreaRange = minMax
+    // if(! offline){
+      propertyQuery( null, null, formQueryString({where: whereArray( type, minMax )}), handlePropertyTypeResponse )
+    // } else {
+    //   handlePropertyTypeResponse(offline.multiple)
+    // }
   }
 }
 
@@ -243,6 +288,15 @@ function handlePropertyTypeResponse(rows) {
   color.total_ghg_emissions_intensity_kgco2e_ft2.domain(arrayQuartiles(ghgVals))
   color.site_eui_kbtu_ft2.domain(arrayQuartiles(euiVals))
 
+  /** Calculate z-score (Wasted a lot of time trying to get JS libs to work here, seems to be a lot easer to
+  *                      explicitly calculat it--admittedly, it could be me as I'm not super JavaScript savvy)
+  *       Libraries explored:
+  *         - jStat: https://github.com/jstat/jstat
+  *         - simple-statistics: https://github.com/simple-statistics/simple-statistics
+  */
+  // categoryData.zscoreVal = jstat.zscore(singleBuildingData.latest_energy_star_score, estarVals)
+  categoryData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
+
   /* draw histogram for energy star */
   estarHistogram.colorScale(color.energy_star_score).bins(100).xAxisLabel('Energy Star Score').yAxisLabel('Buildings')
   estarHistogramElement.datum(estarVals).call(estarHistogram)
@@ -251,7 +305,7 @@ function handlePropertyTypeResponse(rows) {
   /* draw histogram for ghg */
   ghgHistogram
     .range([0,d3.max(ghgVals)])
-    .colorScale(color.energy_star_score)
+    .colorScale(color.total_ghg_emissions_intensity_kgco2e_ft2)
     .bins(100)
     .xAxisLabel('GHG Emissions (Metric Tons CO2)')
     .yAxisLabel('Buildings')
@@ -259,9 +313,10 @@ function handlePropertyTypeResponse(rows) {
   ghgHistogramElement.call(histogramHighlight,singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e,ghgHistogram)
 
   /* draw stacked bar for energy use intensity */
-  var width = parseInt(euiChartElement.style('width'))
+  // var euiWidth = parseInt(euiChartElement.style('width'))
+  var euiWidth = 450
   var euiChart = hStackedBarChart()
-    .width(width)
+    .width(euiWidth)
     .height(60)
     .colorScale(color.site_eui_kbtu_ft2)
     .margin({top: 10, right: 50, bottom: 10, left: 50})
@@ -272,14 +327,15 @@ function handlePropertyTypeResponse(rows) {
 
   /* variables for the ring chart */
   var ringRange = [0,100];
-  var ringHeight = 200;
-  var ringWidth = 200;
+  var ringHeight = 150;
+  var ringWidth = 150;
 
   /**
    * Use c3.js for ring chart
    */
+  //  TODO: override standard mouseover behavior (hide data)
   var ringChart = c3.generate({
-     bindto: '#circle-chart',
+     bindto: '#energy-star-score-radial',
      data: {
          columns: [
              ['data', 0]
@@ -291,12 +347,12 @@ function handlePropertyTypeResponse(rows) {
        label: {
           show:false, // to turn off the min/max labels.
           format: function(value, ratio) {
-              return value + ' out of ' + ringRange[1];
+            return value + ' out of ' + ringRange[1];
           }
        },
        min: ringRange[0], // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change
        max: ringRange[1],
-       width: 20, // for adjusting arc thickness
+       width: 14, // for adjusting arc thickness
        startingAngle: 0,
        fullCircle: true
      },
@@ -311,12 +367,15 @@ function handlePropertyTypeResponse(rows) {
      size: {
          height: ringHeight,
          width: ringWidth
-     }
+    }
   });
 
   ringChart.load({
     columns: [['data', +singleBuildingData.latest_energy_star_score]]
   });
+
+  $('#view-load').addClass('hidden')
+  $('#view-content').removeClass('hidden')
 }
 
 /**
@@ -420,19 +479,34 @@ function apiDataToArray (data) {
 * @return null
 */
 function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
-  d3.selectAll('.foo-num-estar-score').text(singleBuildingData.latest_energy_star_score)
-  d3.selectAll('.foo-num-site-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
-  d3.selectAll('.foo-num-ghg-emissions').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
-  d3.selectAll('.foo-building-type').text(singleBuildingData.property_type_self_selected)
-  d3.selectAll('.foo-building-area').text(numberWithCommas(singleBuildingData.floor_area) + ' ft2')
+  d3.select('#building-energy-star-score').text(singleBuildingData.latest_energy_star_score)
+  d3.select('#building-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
+  d3.selectAll('.building-ghg-emissions ').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
+  d3.selectAll('.building-type-lower').text(singleBuildingData.property_type_self_selected.toLowerCase())
+  d3.selectAll('.building-type-upper').text(singleBuildingData.property_type_self_selected.toUpperCase())
+
+  d3.select('#building-floor-area').text(numberWithCommas(singleBuildingData.floor_area))
   // d3.selectAll('.foo-building-compliance').text(singleBuildingData.)
-  d3.selectAll('.foo-building-name').text(singleBuildingData.building_name)
-  d3.selectAll('.foo-building-address').text(singleBuildingData.building_address)
-  d3.selectAll('.foo-building-floorrange').text(numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]))
+  d3.selectAll('.building-name').text(singleBuildingData.building_name)
+  d3.select('#building-street-address').text(singleBuildingData.building_address)
+  d3.select('#building-city-address').text(
+    singleBuildingData.full_address_city + ' ' +
+    singleBuildingData.full_address_state + ', ' +
+    singleBuildingData.full_address_zip + ' '
+  )
+  d3.selectAll('.building-type-sq-ft').text(numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]))
 
   let euirank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
-  d3.selectAll('.foo-eui-rank').text(euirank[0])
-  d3.selectAll('.foo-eui-rankn').text(euirank[1])
+  d3.select('#building-ranking').text(euirank[0])
+  d3.select('#total-building-type').text(euirank[1])
+
+  //TODO: change #local-ranking-tooltip
+  // the following doesn't quite work:
+  $("#local-ranking-tooltip").attr("data-original-title",
+    "Based on score and energy use intensity, " + singleBuildingData.building_name +"'s energy use ranks #"
+    + euirank[0] +" out of " + euirank[1] + " " + singleBuildingData.property_type_self_selected.toLowerCase() +
+    " buildings sized between " + numberWithCommas(floorAreaRange[0])
+    + '-' + numberWithCommas(floorAreaRange[1]) + " square feet.")
 }
 
 /**

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="38px" height="31px" viewBox="0 0 38 31" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>retail-icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="retail-icon" transform="translate(0.000000, -3.000000)">
+            <g transform="translate(0.000000, 3.000000)">
+                <g>
+                    <g id="hotel-copy" transform="translate(2.171429, 9.325714)" fill="#EBEBEB">
+                        <path d="M26.6,20.8457143 L26.6,8.22857143 L20.0857143,8.22857143 L20.0857143,20.8457143 L0,20.8457143 L0,1.09140608 C0,0.488639147 0.488761983,-3.55271368e-15 1.08171354,-3.55271368e-15 L32.5754293,-3.55271368e-15 C33.1728432,-3.55271368e-15 33.6571429,0.494729576 33.6571429,1.09140608 L33.6571429,20.8457143 L26.6,20.8457143 Z M3.34285714,8.13142857 L3.34285714,15.2598942 L13.6528576,15.2598942 L13.6528576,8.13142857 L3.34285714,8.13142857 Z" id="Combined-Shape"></path>
+                    </g>
+                    <path d="M3.24313447,0.518571429 C3.32355272,0.232172337 3.6221111,0 3.93066973,0 L34.0693303,0 C34.3686273,0 34.6759241,0.230309143 34.7568655,0.518571429 L38,12.0685714 L1.0658141e-14,12.0685714 L3.24313447,0.518571429 Z" id="Combined-Shape" fill="#DCDCDC"></path>
+                    <ellipse id="Oval-3-Copy-9" fill="#DCDCDC" cx="36.1" cy="12.3428571" rx="1.9" ry="1.92"></ellipse>
+                    <ellipse id="Oval-3-Copy-8" fill="#DCDCDC" cx="32.3" cy="12.3428571" rx="1.9" ry="1.92"></ellipse>
+                    <ellipse id="Oval-3-Copy-7" fill="#DCDCDC" cx="28.5" cy="12.3428571" rx="1.9" ry="1.92"></ellipse>
+                    <ellipse id="Oval-3-Copy-6" fill="#DCDCDC" cx="24.7" cy="12.3428571" rx="1.9" ry="1.92"></ellipse>
+                    <ellipse id="Oval-3-Copy-5" fill="#DCDCDC" cx="20.9" cy="12.3428571" rx="1.9" ry="1.92"></ellipse>
+                    <ellipse id="Oval-3-Copy-4" fill="#DCDCDC" cx="17.1" cy="12.3428571" rx="1.9" ry="1.92"></ellipse>
+                    <ellipse id="Oval-3-Copy-3" fill="#DCDCDC" cx="13.3" cy="12.3428571" rx="1.9" ry="1.92"></ellipse>
+                    <ellipse id="Oval-3-Copy-2" fill="#DCDCDC" cx="9.5" cy="12.3428571" rx="1.9" ry="1.92"></ellipse>
+                    <ellipse id="Oval-3-Copy" fill="#DCDCDC" cx="5.7" cy="12.3428571" rx="1.9" ry="1.92"></ellipse>
+                    <ellipse id="Oval-3" fill="#DCDCDC" cx="1.9" cy="12.3428571" rx="1.9" ry="1.92"></ellipse>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

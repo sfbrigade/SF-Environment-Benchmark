@@ -356,6 +356,9 @@ function handlePropertyTypeResponse(rows) {
        startingAngle: 0,
        fullCircle: true
      },
+     tooltip: {
+          show: false
+        },
      color: {
          pattern: colorSwatches.energy_star_score, // the three color levels for the percentage values.
          threshold: {

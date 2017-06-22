@@ -58,34 +58,40 @@
 </head>
 <body>
 
-<div class="container-fluid">
-	<div class="row">
-	    <nav class="navbar navbar-default navbar-fixed-top">
-	      <div class="container">
-	        <div class="navbar-header">
-	          <a class="navbar-brand" href=""><img src="../assets/sf_logo.png" alt="SF Dept of Environment"></a>
-	        </div>
-	      </div>
-	    </nav>
-    </div>
-      <div class="row">
+	<div class="container-fluid">
+		<div class="row">
+			<nav class="navbar navbar-default navbar-fixed-top">
+				<div class="container">
+					<div class="navbar-header">
+						<a class="navbar-brand" href=""><img src="../assets/sf_logo.png" alt="SF Dept of Environment"></a>
+					</div>
+				</div>
+			</nav>
+		</div>
+		<div id="view-welcome" style="margin-top: 1em;">
+			<p>This dashboard is a project of the <a href="http://datascience.codeforsanfrancisco.org">Data Science Working Group</a> at Code for San Francisco.</p>
+			<p>The intent is help building property managers understand the energy usage in compliance with the <a href="https://sfenvironment.org/energy/energy-efficiency/commercial-and-multifamily-properties/existing-commercial-buildings-energy-performance-ordinance">Existing Commercial Buildings Ordinance</a>.</p>
+			<p>To see an example of a specific property, <a href="index.html?apn=3705/039">click here</a>.</p>
+		</div>
+		<div id="view-load" class="hidden" style="margin-top: 1em;">
+			Loading...
+		</div>
+      <div id="view-content" class="row hidden">
       	<div class="col-xs-3">
 			<div class="row">
 	            <div class="panel-body side flex-grow">
                 	<div class="col-xs-12">
                 		<div class="row center">
-                			<h5>BENCHMARKING PROFILE</h5>
+                			<div class="profile-header">BENCHMARKING PROFILE</div>
                 		</div>
                 		<div class="row center">
                 			<img src="../assets/hotel-icon.svg" alt="hotel-icon" id="building-icon">
                 			<span class="building-name side">Hotel Zetta</span>
                 		</div>
                 		<div class="row center address">
-                <!-- 			<h4 id="building-street-address">55 5th St</h4>
-                			<h4 id="building-city-address">San Francisco, CA 94103</h4> -->
                 			<span class="address" id="building-street-address">55 5th St</span><br>
                 			<span class="address" id="building-city-address">San Francisco, CA 94103</span>
-                		</div>
+                		</div><br>
                 		<div class="row center">
                 		<div class="col-xs-1"></div>
                 			<div class="col-xs-5 building-units">
@@ -107,11 +113,12 @@
                 			</div>
                 		</div><br>
                 		<div class="row center">
-                			<span class="ranking">LOCAL RANKING</span>
+                			<span class="ranking">LOCAL RANKING 2015</span>
                 		</div>
+                		<br>
                 		<div class="row center">
-                			#<span id="building-ranking">28</span> out of <span id="total-building-type"></span> buildings<a href="#" data-toggle="tooltip" id="local-ranking-tooltip" title="Based on score and energy use intensity, the Hotel Zetta's energy use ranks #28 out of 50 hotel buildings sized between 100,000-250,000 square feet."><span class="glyphicon glyphicon-question-sign"></span></a>
-                		</div><br>
+								#<span id="building-ranking">28</span> out of <span id="total-building-type"></span> buildings<a href="#" data-toggle="tooltip" id="local-ranking-tooltip" title=""><span class="glyphicon glyphicon-question-sign"></span></a>
+						</div><br>
                 		<div class="row center">
                 			<a href="https://sfenvironment.org/article/how-to-comply-with-benchmarking-in-san-francisco" class="btn btn-primary btn-round-lg btn-lg">BENCHMARK NOW</a>
                 		</div>
@@ -137,11 +144,11 @@
 			<div class="row">
 				<div id="tabs">
 				<ul  class="nav nav-pills">
-					<li class="active"><a href="#energy-score" data-toggle="tab">ENERGY STAR SCORE</a>
+					<li class="active"><a id="energy-star-tab" href="#energy-score" data-toggle="tab">ENERGY STAR SCORE</a>
 					</li>
-					<li><a href="#energy-use" data-toggle="tab">SITE ENERGY USE INTENSITY</a>
+					<li><a id="eui-tab" href="#energy-use" data-toggle="tab">SITE ENERGY USE INTENSITY</a>
 					</li>
-					<li><a href="#ghg" data-toggle="tab">GHG EMISSIONS</a>
+					<li><a id="ghg-tab" href="#ghg" data-toggle="tab">GHG EMISSIONS</a>
 					</li>
 				</ul>
 			<div class="tab-content clearfix">
@@ -162,116 +169,117 @@
 	        		<div class="row center">
 	        			<div class="col-xs-2"></div>
 	        			<div class="col-xs-8">
-	        			<div class="chart-title">ENERGY STAR SCORE FOR<span class="building-type"> HOTEL</span> BUILDINGS IN SAN FRANCISCO<br><span id="bulding-type-sq-ft">150,000-200,000</span> SQUARE FEET</div>
+	        			<div class="chart-title">ENERGY STAR SCORE FOR <span class="building-type"> HOTEL</span> BUILDINGS IN SAN FRANCISCO<br><span id="bulding-type-sq-ft">150,000-200,000</span> SQUARE FEET</div>
 	        			</div>
 	        			<div class="col-xs-2"></div>
 	        		</div>
 	        		<div class="row center">
-			        	<div class="col-xs-3"></div>
-	        			<div class="col-xs-6">
+			        	<div class="col-xs-2"></div>
+	        			<div class="col-xs-8">
 	        				<!-- <div class="loading">Loading&mdash;</div> -->
 	        				<div id="energy-star-score-histogram" class="histogram-chart"></div>
 	        			</div>
-	        			<div class="col-xs-3"></div>
+	        			<div class="col-xs-2"></div>
 	        		</div>
 	        		<div class="row">
 			        	<div class="col-xs-12 panel-bottom">
 			            		<div class="panel-bottom-header">ABOUT THE ENERGY STAR SCORE</div><br>
 			            		<div class="panel-bottom-text">
-			            		The ENERGY STAR score is a rating between 1-100 that summarizes at a glance how a building is performing compared to similar buildings nationwide, after accounting for local climate. The higher the score, the better; buildings with a score of 75 or better may qualify for ENERGY STAR certification as top performers. The score uses the information you entered about your building, including: size, location, occupancy, number of computers, etc.
-			            		</div><br>
+			            		- a rating between 1-100 that summarizes at a glance how a building is performing compared to similar buildings nationwide, after accounting for local climate. The higher the score, the better; buildings with a score of 75 or better may qualify for ENERGY STAR certification as top performers. The score uses the information you entered about your building, including: size, location, occupancy, number of computers, etc.
+			            		<br><br>
 		            			<a class="link" href="https://sfenvironment.org/article/commercial/sf-energy-watch-commercial-program">San Francisco Energy Watch can help you save money, save energy, and improve your ENERGY STAR score</a>
+		            			</div>
 				   		</div>
 					</div>
 				</div>
-		        <div class="tab-pane" id="energy-use">
-		          	<div class="row border-bottom">
-		          		<div class="col-xs-3">
-		          			<div class="row center">
-			          			<img src="../assets/EUI.svg" alt="GHG emissions">
-			          		</div>
-			          		<div class="row center">
-			          			<span id="building-eui" class="ranking-num">59.9</span>
-			          			<span class="ranking-units">kbtu/ft<sup>2</sup></span>
-			          		</div>
-		          		</div>
-			          	<div class="col-xs-7">
-			          		<div class="ranking-text">
-			          		<span class="building-name">Hotel Zetta</span> has an EUI <span id="eui-relative-ranking">lower</span> than the national <span class="building-type">hotel</span> median for <span class="building-type">hotels</span>.
-			          		</div>
-			          	</div>
-			          	<div class="col-xs-2"></div>
-			        </div>
-			       	<div class="row center">
-	        			<div class="col-xs-2"></div>
-	        			<div class="col-xs-8">
-	        			<div class="chart-title">SITE ENERGY USE INTENSITY FOR <span class="building-type">HOTEL</span> BUILDINGS IN SAN FRANCISCO<br><span class="building-type-sq-ft">150,000-200,000</span> SQUARE FEET</div>
-	        			</div>
-	        			<div class="col-xs-2"></div>
-	        		</div>
-		            <div class="row center">
-			        	<div class="col-xs-2"></div>
-	        			<div class="col-xs-8">
-	        				<!-- <div class="loading">Loading&mdash;</div> -->
-	        				<div id="eui-stackedbar" class="chart-stackedbar"></div>
-	        			</div>
-	        			<div class="col-xs-2"></div>
-	        		</div>
-			        <div class="row">
-			        	<div class="col-xs-12 panel-bottom">
-		            		<div class="panel-bottom-header">SITE ENERGY USE INTENSITY</div><br>
-		            		<div class="panel-bottom-text">
-		            		— annual energy consumption divided by gross floor area. EUI may be calculated as Site EUI (energy used on site divided by floor area), or Source EUI (site energy use plus transmission, delivery, and production losses, divided by floor area).
-		            		</div>
-		            	</div>
-				    </div>
+				<div class="tab-pane" id="energy-use">
+					<div class="row border-bottom">
+						<div class="col-xs-3">
+							<div class="row center">
+								<img src="../assets/EUI.svg" alt="GHG emissions">
+							</div>
+							<div class="row center">
+								<span id="building-eui" class="ranking-num">59.9</span>
+								<span class="ranking-units">kbtu/ft<sup>2</sup></span>
+							</div>
+						</div>
+						<div class="col-xs-7">
+							<div class="ranking-text">
+								<span class="building-name">Hotel Zetta</span> has an EUI <span id="eui-relative-ranking">lower</span> than the national <span class="building-type">hotel</span> median for <span class="building-type">hotels</span>.
+							</div>
+						</div>
+						<div class="col-xs-2"></div>
+					</div>
+					<div class="row center">
+						<div class="col-xs-2"></div>
+						<div class="col-xs-8">
+							<div class="chart-title">SITE ENERGY USE INTENSITY FOR <span class="building-type">HOTEL</span> BUILDINGS IN SAN FRANCISCO<br><span class="building-type-sq-ft">150,000-200,000</span> SQUARE FEET</div>
+						</div>
+						<div class="col-xs-2"></div>
+					</div>
+					<div class="row center">
+						<div class="col-xs-2"></div>
+						<div class="col-xs-8">
+							<!-- <div class="loading">Loading&mdash;</div> -->
+							<div id="eui-stackedbar" class="chart-stackedbar"></div>
+						</div>
+						<div class="col-xs-2"></div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12 panel-bottom">
+							<div class="panel-bottom-header">SITE ENERGY USE INTENSITY</div><br>
+							<div class="panel-bottom-text">
+								— annual energy consumption divided by gross floor area. EUI may be calculated as Site EUI (energy used on site divided by floor area), or Source EUI (site energy use plus transmission, delivery, and production losses, divided by floor area).
+							</div>
+						</div>
+					</div>
 				</div>
-		         <div class="tab-pane" id="ghg">
-		          	<div class="row border-bottom">
-			          	<div class="col-xs-3">
-			          		<div class="row center">
-			          			<img src="../assets/GHG-icon.svg" alt="GHG emissions">
-			          		</div>
-			          		<div class="row center">
-			          			<span class="ranking-num building-ghg-emissions">468.5</span>
-			          			<span class="ranking-units">MT CO<sub>2</sub></span>
-			          		</div>
-			          	</div>
-			          	<div class="col-xs-7">
-			          		<div class="ranking-text">
-			          		Building energy use by <span class="building-name">Hotel Zetta</span> resulted in <span class="building-ghg-emissions">468.5</span> tons CO<sub>2</sub> of greenhouse gas emissions in 2015.
-			          		</div>
-			          	</div>
-			          	<div class="col-xs-2"></div>
-			        </div>
-			       	<div class="row center">
-	        			<div class="col-xs-2"></div>
-	        			<div class="col-xs-8">
-	        			<div class="chart-title">GREENHOUSE GAS EMISSIONS <span class="building-type">HOTEL</span> BUILDINGS IN SAN FRANCISCO<br><span class="building-type-sq-ft">150,000-200,000</span> SQUARE FEET</span></div>
-	        			</div>
-	        			<div class="col-xs-2"></div>
-	        		</div>
+				<div class="tab-pane" id="ghg">
+					<div class="row border-bottom">
+						<div class="col-xs-3">
+							<div class="row center">
+								<img src="../assets/GHG-icon.svg" alt="GHG emissions">
+							</div>
+							<div class="row center">
+								<span class="ranking-num building-ghg-emissions">468.5</span>
+								<span class="ranking-units">MT CO<sub>2</sub></span>
+							</div>
+						</div>
+						<div class="col-xs-7">
+							<div class="ranking-text">
+								Building energy use by <span class="building-name">Hotel Zetta</span> resulted in <span class="building-ghg-emissions">468.5</span> tons CO<sub>2</sub> of greenhouse gas emissions in 2015.
+							</div>
+						</div>
+						<div class="col-xs-2"></div>
+					</div>
+					<div class="row center">
+						<div class="col-xs-2"></div>
+						<div class="col-xs-8">
+							<div class="chart-title">GREENHOUSE GAS EMISSIONS FOR <span class="building-type">HOTEL</span> BUILDINGS IN SAN FRANCISCO<br><span class="building-type-sq-ft">150,000-200,000</span> SQUARE FEET</span></div>
+						</div>
+						<div class="col-xs-2"></div>
+					</div>
 
-			        <div class="row">
-			        	<div class="col-xs-12">
-			        		<div class="row center">
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="row center">
 								<div id="ghg-emissions-histogram" class="histogram-chart"></div>
-			        		</div>
-			        	</div>
-			        	<div class="col-xs-12 panel-bottom">
-		            		<div class="panel-bottom-header">GREENHOUSE GAS (GHG) EMISSIONS</div><br>
-		            		<div class="panel-bottom-text">
-		            		— carbon dioxide (CO<sub>2</sub>) and other gases released into the atmosphere as a result of energy consumption at the property. Emissions are expressed in carbon dioxide equivalent (CO<sub>2</sub>e), which normalizes global warming potential of each gas to an equivalent quantity of carbon dioxide
-		            		</div>
-		            	</div>
-				    </div>
+							</div>
+						</div>
+						<div class="col-xs-12 panel-bottom">
+							<div class="panel-bottom-header">GREENHOUSE GAS (GHG) EMISSIONS</div><br>
+							<div class="panel-bottom-text">
+								— carbon dioxide (CO<sub>2</sub>) and other gases released into the atmosphere as a result of energy consumption at the property. Emissions are expressed in carbon dioxide equivalent (CO<sub>2</sub>e), which normalizes global warming potential of each gas to an equivalent quantity of carbon dioxide
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
-  		</div>
 		</div>
-		</div>
-      </div>
-    </div> <!-- /container -->
+	</div>
+</div>
+</div>
+</div> <!-- /container -->
 
     <script>
 		$(document).ready(function(){

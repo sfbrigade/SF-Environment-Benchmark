@@ -199,7 +199,7 @@ body {
 	color: white;
 }
 
-.btn-primary:hover, .btn-primary:focus {
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary:active:focus {
 	background-color: #c45f00;
 }
 .address {

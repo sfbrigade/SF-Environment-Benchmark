@@ -18,12 +18,14 @@ The original goal of the SF Environment Benchmark project was to visualize build
 ### Slack Channel: \#datasci-energyenv
 | Name | Slack Handle | Contribution |
 | ---| --- | --- |
+| Anna Kiefer | @askiefer | Planning/Development |
+| Eric Youngson | @eayoungs | Planning/Development |
+| Juliana Vislova | @juliana  | Design |
+| Tyler Field | @tyler | Development |
+| Peter W | @peterw | Development |
 | Sanat Moningi | @sanat | Visualization |
-| Tyler Field | @tyler | Visualization |
 | Geoffrey Pay | @gpay | Visualization |
 | Baolin Liu | | Modeling |
-| Anna Kiefer | @askiefer | Planning |
-| Eric Youngson | @eayoungs | Planning |
 
 ## Tech
 - D3

@@ -510,9 +510,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.select('#building-ranking').text(euirank[0])
   d3.select('#total-building-type').text(euirank[1])
 
-  // Looks like this function was abandoned since there is no 'latest year' any longer
-  // TODO (eayoungs@gmail.com): Need to recreate the 'latest year' function; this uses 2016 as a static 'latest year'.
-  var complianceStatusIndicator = (singleBuildingData.benchmark_2016_status == "Complied") ?
+  var complianceStatusIndicator = (singleBuildingData.latest_benchmark == "Complied") ?
     ' <i class="fa fa-check" aria-hidden="true"></i>'
     :
     ' <i class="fa fa-times attn" aria-hidden="true"></i>'

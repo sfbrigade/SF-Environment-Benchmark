@@ -9,7 +9,10 @@ The original goal of the SF Environment Benchmark project was to visualize build
 
 ### Live links
  - [SF Energy and GHG Map Visualization](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/map)
- - [SF Environment Benchmark Dashboard](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/dashboard)
+ - [SF Environment Benchmark Dashboards (Example building):](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/)
+     + [Energy Star](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/dashboard/estar.html?apn=3705/039)
+     + [EUI](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/dashboard/eui.html?apn=3705/039)
+     + [GHG](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/dashboard/ghg.html?apn=3705/039)
  - [Mocks up for building-profile dashboard](https://projects.invisionapp.com/share/2SAI4AK48#/screens/219556065_SF-Environment-Benchmark)
 
 
@@ -18,12 +21,14 @@ The original goal of the SF Environment Benchmark project was to visualize build
 ### Slack Channel: \#datasci-energyenv
 | Name | Slack Handle | Contribution |
 | ---| --- | --- |
+| Anna Kiefer | @askiefer | Planning/Development |
+| Eric Youngson | @eayoungs | Planning/Development |
+| Juliana Vislova | @juliana  | Design |
+| Tyler Field | @tyler | Development |
+| Peter W | @peterw | Development |
 | Sanat Moningi | @sanat | Visualization |
-| Tyler Field | @tyler | Visualization |
 | Geoffrey Pay | @gpay | Visualization |
 | Baolin Liu | | Modeling |
-| Anna Kiefer | @askiefer | Planning |
-| Eric Youngson | @eayoungs | Planning |
 
 ## Tech
 - D3

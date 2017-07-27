@@ -69,7 +69,7 @@ function histogramChart() {
       svg.selectAll('.xlabel').remove()
       svg.append('text')
           .attr("transform", "translate(" + (width - margin.right) + "," + (height - 3) + ")")
-          .attr('class', 'axis label xlabel')
+          .attr('class', 'axis axislabel xlabel')
           .style("text-anchor", "end")
           .text(xAxisLabel)
 
@@ -80,7 +80,7 @@ function histogramChart() {
       svg.selectAll('.ylabel').remove()
       svg.append('text')
           .attr("transform", "translate(" + (margin.left + 10) + "," + (margin.top) + ")rotate(-90)")
-          .attr('class', 'axis label ylabel')
+          .attr('class', 'axis axislabel ylabel')
           .style("text-anchor", "end")
           .text(yAxisLabel)
     });

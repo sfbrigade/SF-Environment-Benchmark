@@ -18,7 +18,9 @@ body {
 	padding-left: 10px;
 }
 .navbar-brand>img {
-	width: 17em;
+	width: 11em;
+	margin-left: 25px;
+	margin-top: 5px;
 }
 .nav-pills>li>a {
 	color: #B4B8BB;
@@ -28,14 +30,12 @@ body {
 .nav-pills>li.active>a:hover {
 	background-color: white;
 	color: #3D3D3D;
-	font-weight: bold;
-	border-radius: 0;
-	border-top: 5px solid #00B08C;
-	line-height: 15px;
+	border-top: 5px solid #1D8064;
+	border-bottom: 1px solid #F2F2F2;
 }
 .nav-pills>li {
 	background-color: #FBFCFA;
-	width: 33.15%;
+	width: 100%;
 	font-size: 12px;
 	text-align: center;
 	line-height: 15px;
@@ -44,14 +44,23 @@ body {
 
 @media screen and (max-width: 968px) {
 	.nav-pills>li {
-		width: 33.1%;
+		width: 100%%;
 		font-size: 12px;
 	}
 }
 .fa.fa-building {
-	padding-right: 5%;
-	font-size: 30px;
+	padding-right: 3%;
+	font-size: 25px;
 	color: #C6CED3;
+}
+.attn {
+	color: #EF839E;
+}
+.fa-check {
+	color: green;
+}
+.fa-check, .fa-times {
+	font-size: 1.5em;
 }
 #tabs .tab-content {
   color : white;
@@ -76,21 +85,19 @@ body {
 	padding: 5px 15px;
 }
 .panel-body {
-	-webkit-box-shadow: 1px 1px #999;
-    -moz-box-shadow: 0 6px 4px -4px #999;
+	-webkit-box-shadow: 1px 1px #4d4d4d;
+    -moz-box-shadow: 0 6px 4px -4px #4d4d4d;
     box-shadow: 0 2px 19px 0 rgba(0,0,0,0.14);
     border-radius: 0;
     border: none;
-    padding-top: 6%;
-    background-color: #00B08C;
+    padding: 6%;
+    background-color: #F2F2F2;
     height: 100vh;
 }
 .building-name.side {
-	font-size: 24px;
+	font-size: 20px;
 	font-weight: 500;
-	color: white;
-	line-height: 18px;
-	opacity: 100%;
+	color: #0B0B0B;
 	letter-spacing: 1px;
 	text-align: center;
 }
@@ -112,10 +119,10 @@ body {
 	margin: 0;
 }
 .navbar {
-	/*background: linear-gradient(90deg, #E5E8E5 0%, #E5E8E5 100%);*/
-	-webkit-box-shadow: 0 8px 6px -6px #999;
-    -moz-box-shadow: 0 8px 6px -6px #999;
-    box-shadow: 0 8px 6px -6px #999;
+	background: linear-gradient(90deg, #1D8064 0%, #1D8064 100%);
+	-webkit-box-shadow: 0 8px 6px -6px #4d4d4d;
+    -moz-box-shadow: 0 8px 6px -6px #4d4d4d;
+    box-shadow: 0 8px 6px -6px #4d4d4d;
     border: none;
     height: 60px;
 	border-radius: 2px;
@@ -136,15 +143,18 @@ body {
 	letter-spacing: 1.2px;
 }
 .ranking-text {
-	padding: 6%;
+	padding: 3%;
+	margin-top: 2%;
 	font-size: 16px;
 	color: #3D3D3D;
 }
 .ranking-num {
 	font-size: 32px;
+	color: #0B0B0B;
 }
 .ranking-units {
 	font-size: 14px;
+	color: #0B0B0B;
 }
 .dashboard-num-large {
 	font-size: 56px;
@@ -180,12 +190,11 @@ body {
 	background-color: #F78C66;
 	border: none;
 	border-radius: 100px;
-	font-size: 16px;
 	width: 80%;
 	box-shadow: 0 2px 4px 0 rgba(0,0,0,0.14);
-	height: 50px;
-	font-size: 16px;
-	line-height: 30px;
+	height: 40px;
+	font-size: 14px;
+	line-height: 20px;
 	letter-spacing: 1px;
 	color: white;
 }
@@ -194,16 +203,15 @@ body {
 	background-color: #c45f00;
 }
 .address {
-	font-size: 17px;
-	color: #FFFFFF;
-	line-height: 24px;
+	font-size: 14px;
+	color: #535557;
+	line-height: 20px;
 }
 .side-panel-text {
 	font-size: 14px;
-	color: #FFFFFF;
+	color: #535557;
 	padding-top: 10%;
 	padding-bottom: 10%;
-	font-weight: bold;
 	letter-spacing: 1px;
 	line-height: 24px;
 	text-align: center;
@@ -217,13 +225,13 @@ body {
 
 .building-units {
 	text-align: right;
-	color: #6ED9BE;
+	color: #535557;
 }
 .building-data {
 	padding-right: 8%;
 	padding-left: 8%;
 	text-align: left;
-	color: #6ED9BE;
+	color: #535557;
 }
 .building-ranking {
 	color: #FFFFFF;
@@ -245,9 +253,9 @@ h4 {
 	color: #3D3D3D;
 }
 .profile-header {
-	color: #6ED9BE;
-	padding-bottom: 4%;
-	font-size: 12px;
+	color: #1D8064;
+	padding-bottom: 5%;
+	font-size: 11px;
 }
 .nav {
 	padding-left: 1px;
@@ -256,18 +264,12 @@ h4 {
 	padding-left: 6%;
 	padding-right: 6%;
 }
-.link {
-	padding-bottom: 5%;
-	text-decoration: underline;
-}
+
 .link a {
 	padding-top: 2%;
-	color: #FFFFFF;
-	font-size: 14px;
-	line-height: 24px;
+	font-size: 12px;
 	letter-spacing: 1px;
 	text-decoration: underline;
-	font-weight: 500;
 }
 
 .panel-bottom-header {
@@ -302,7 +304,8 @@ h4 {
 	border-left: 1px solid lightgray;
 }
 .border-bottom {
-	border-bottom: 2px dotted darkgray;
+	border-bottom: 2px dotted lightgray;
+	padding-bottom: 2%;
 }
 .ranking {
 	width: 164px;
@@ -323,7 +326,7 @@ h4 {
 
 /* charts */
 
-.chart-stackedbar {
+.chart-quartiles {
 	padding-bottom: 7%;
 }
 
@@ -348,4 +351,9 @@ h4 {
   fill: #777;
   font: 10px sans-serif;
   text-anchor: middle;
+}
+
+.axislabel {
+	font-size: 0.8em;
+	fill: #777;
 }

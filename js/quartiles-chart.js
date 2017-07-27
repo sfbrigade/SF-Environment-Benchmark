@@ -1,4 +1,4 @@
-function hStackedBarChart() {
+function quartilesChart() {
   /* TODO use d3.stack instead */
 
   var margin = {top: 0, right: 0, bottom: 20, left: 10},
@@ -15,7 +15,8 @@ function hStackedBarChart() {
   function chart(selection) {
     selection.each(function(data) {
       /* stacked bar chart example http://bl.ocks.org/mbostock/1134768 */
-      data = arrayQuartiles(data)
+      var data = arrayQuartiles(data)
+      var maxVal = d3.max(data)
 
       /* Update the x-scale. */
       x   .domain(d3.extent(data))
@@ -25,12 +26,14 @@ function hStackedBarChart() {
       y   .domain( [0,1] )
           .range([height - margin.top - margin.bottom, 0]);
 
+      var trianglepoints = `${x.range()[0]} ${y.range()[0]}, ${x.range()[1]} ${y.range()[0]}, ${x.range()[1]} ${y.range()[1]} `
+
       /* Select the svg element, if it exists. */
       var svg = d3.select(this).selectAll("svg").data([data]);
 
       /* Otherwise, create the skeletal chart. */
       var gEnter = svg.enter().append("svg").append("g");
-      gEnter.append("g").attr("class", "bars");
+      gEnter.append("g").attr("class", "triangle");
       gEnter.append("g").attr("class", "labels");
 
       /* Update the outer dimensions. */
@@ -41,39 +44,43 @@ function hStackedBarChart() {
       var g = svg.select("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      /* Update the bars. */
-      var bar = svg.select(".bars").selectAll(".bar").data(data);
-      bar.enter().append("rect").attr('class', 'bar');
-      bar.exit().remove();
-      bar .attr("width", function(d,i){ return x(data[i+1]) - x(d) })
-          .attr("x", function(d,i) { return (i===0) ? 0 : x(d) })
-          .attr("y", function(d) { return y(1); })
-          .attr("height", function(d) { return y.range()[0] - y(1) })
-          .attr('fill', function(d,i){ return color(d) } )
-          .order()
+      // arrayQuartiles, color.range()
+      var gradientSteps = data.map(function(val,i){
+        return {offset: x(val)/x(maxVal), color: color.range()[i] }
+      })
+      var defs = svg.append("defs");
+      var linearGradient = defs.append("linearGradient")
+          .attr("id", "linear-gradient");
+      linearGradient.selectAll("stop")
+        .data( gradientSteps )
+        .enter().append("stop")
+        .attr("offset", function(d) { return d.offset; })
+        .attr("stop-color", function(d) { return d.color; });
+
+      var triangle = svg.select(".triangle").append("polygon");
+      triangle.attr('class', 'triangle');
+      triangle.attr("points", trianglepoints)
+          .attr("fill", "none")
+          .style("fill", "url(#linear-gradient)");
 
       /* Update the axis labels. */
-      var label = svg.select('.labels').selectAll('.label').data(data);
-      label.enter().append('text').attr('class', 'label');
+      var label = svg.select('.labels').selectAll('.axislabel').data(data);
+      label.enter().append('text').attr('class', 'axislabel');
       label.exit().remove();
       label.style("text-anchor", function(d, i){
             if (i === 0) {return 'end'}
-            else if (i === 4 ) {return 'start'}
+            else if (i === 4 || i === 2) {return 'start'}
             else {return 'middle'}
           })
-          .style('alignment-baseline', function(d, i){
-            if (i === 0 || i === 4 ) return 'middle'
-            else if (i === 1 || i === 3 ){return 'before-edge'}
-            return 'after-edge'
-          })
+          .style('alignment-baseline', 'before-edge')
           .attr("transform", function(d,i){
-            var ypos
-            if (i === 0 || i === 4 ) ypos = 0.5
-            else if (i === 1 || i === 3 ){ypos = 0}
-            else {ypos = 1}
-            return "translate(" + x(d) + "," + y(ypos) + ")"
+            return "translate(" + x(d) + "," + y(0) + ")"
           })
-          .text(function(d){return d})
+          .text(function(d,i){
+            var val = d
+            if (i === 2) val += '-Median EUI'
+            return val
+          })
     });
   }
 

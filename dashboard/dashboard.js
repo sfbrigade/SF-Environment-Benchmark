@@ -510,7 +510,9 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.select('#building-ranking').text(euirank[0])
   d3.select('#total-building-type').text(euirank[1])
 
-  var complianceStatusIndicator = (singleBuildingData.latest_benchmark == "Complied") ?
+  // TODO (eayoungs@gmail.com): Update latest() function to work for benchmark status (benchmark_2016_status
+  //                            is a temporary fix for the current year)
+  var complianceStatusIndicator = (singleBuildingData.benchmark_2016_status == "Complied") ?
     ' <i class="fa fa-check" aria-hidden="true"></i>'
     :
     ' <i class="fa fa-times attn" aria-hidden="true"></i>'

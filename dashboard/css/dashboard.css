@@ -199,7 +199,7 @@ body {
 	color: white;
 }
 
-.btn-primary:hover, .btn-primary:focus {
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary:active:focus {
 	background-color: #c45f00;
 }
 .address {
@@ -241,8 +241,11 @@ body {
 	text-align: center;
 	font-weight: 200;
 }
-#local-ranking-tooltip {
+/*#local-ranking-tooltip {
 	color: #6ED9BE;
+}*/
+.tooltip-inner {
+	width: 300px;
 }
 
 h2 {

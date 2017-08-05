@@ -303,6 +303,7 @@ function handlePropertyTypeResponse(rows) {
     .bins(100)
     .xAxisLabel('GHG Emissions (Metric Tons CO2)')
     .yAxisLabel('Buildings')
+    // .tickFormat(d3.format("d"))
   ghgHistogramElement.datum(ghgVals).call(ghgHistogram)
   ghgHistogramElement.call(addHighlightLine,singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e,ghgHistogram,singleBuildingData.building_name)
 
@@ -492,11 +493,15 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.select('#building-energy-star-score').text(singleBuildingData.latest_energy_star_score)
   d3.select('#building-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
   d3.selectAll('.building-ghg-emissions ').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
+
+  if ( !singleBuildingData.latest_energy_star_score ) {
+    d3.select('#estar-text').html(`The national <span class="building-type-lower">hotel</span> median energy star score is 50.`)
+  }
+
   d3.selectAll('.building-type-lower').text(singleBuildingData.property_type_self_selected.toLowerCase())
   d3.selectAll('.building-type-upper').text(singleBuildingData.property_type_self_selected.toUpperCase())
 
   d3.select('#building-floor-area').text(numberWithCommas(singleBuildingData.floor_area))
-  // d3.selectAll('.foo-building-compliance').text(singleBuildingData.)
   d3.selectAll('.building-name').text(singleBuildingData.building_name)
   d3.select('#building-street-address').text(singleBuildingData.building_address)
   d3.select('#building-city-address').text(

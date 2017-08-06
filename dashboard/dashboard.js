@@ -290,6 +290,8 @@ function handlePropertyTypeResponse(rows) {
   // categoryData.zscoreVal = jstat.zscore(singleBuildingData.latest_energy_star_score, estarVals)
   categoryData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
 
+  singleBuildingData.localRank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC)
+
   /* draw histogram for energy star */
   estarHistogram.colorScale(color.energy_star_score).bins(100).xAxisLabel('Energy Star Score').yAxisLabel('Buildings')
   estarHistogramElement.datum(estarVals).call(estarHistogram)
@@ -334,7 +336,7 @@ function handlePropertyTypeResponse(rows) {
   .innerRadius(ringRadius - ringThick)
   .startAngle(0)
 
-  var euirank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC)
+
 
   var ringElement = d3.select('#energy-star-score-radial')
   var ringSvg = ringElement.append("svg")
@@ -349,15 +351,15 @@ function handlePropertyTypeResponse(rows) {
   .attr('d', arc)
 
   var fg = ringSvg.append('path')
-  .datum({ endAngle:  arcAngle(euirank[0]) })
-  .attr('fill', function(d){return color.energy_star_score(euirank[0]) })
+  .datum({ endAngle:  arcAngle(singleBuildingData.localRank[0]) })
+  .attr('fill', function(d){return color.energy_star_score(singleBuildingData.localRank[0]) })
   .attr('d', arc)
 
   // ringSvg.append('text').text('out of 100')
   ringSvg.append('text')
       .attr('text-anchor', 'middle')
       .attr('alignment-baseline', 'middle')
-      .text(euirank[0] + ' out of ' + euirank[1])
+      .text(singleBuildingData.localRank[0] + ' out of ' + singleBuildingData.localRank[1])
 
   function arcAngle(value, max){
     max = max || 100
@@ -511,10 +513,8 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   )
   d3.selectAll('.building-type-sq-ft').text(numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]))
 
-  let euirank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC)
-
-  d3.select('#building-ranking').text(euirank[0])
-  d3.select('#total-building-type').text(euirank[1])
+  d3.select('#building-ranking').text(singleBuildingData.localRank[0])
+  d3.select('#total-building-type').text(singleBuildingData.localRank[1])
 
   var complianceStatusIndicator = (singleBuildingData.latest_benchmark == "Complied") ?
     ' <i class="fa fa-check" aria-hidden="true"></i>'
@@ -528,7 +528,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   // the following doesn't quite work:
   $("#local-ranking-tooltip").attr("data-original-title",
     "Based on score and energy use intensity, " + singleBuildingData.building_name +"'s energy use ranks #"
-    + euirank[0] +" out of " + euirank[1] + " " + singleBuildingData.property_type_self_selected.toLowerCase() +
+    + singleBuildingData.localRank[0] +" out of " + singleBuildingData.localRank[1] + " " + singleBuildingData.property_type_self_selected.toLowerCase() +
     " buildings sized between " + numberWithCommas(floorAreaRange[0])
     + '-' + numberWithCommas(floorAreaRange[1]) + " square feet.")
 }

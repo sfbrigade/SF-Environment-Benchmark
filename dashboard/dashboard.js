@@ -19,7 +19,8 @@ var colorSwatches = {
 var color = {
   energy_star_score: d3.scale.threshold().range(colorSwatches.energy_star_score),
   total_ghg_emissions_intensity_kgco2e_ft2: d3.scale.threshold().range(colorSwatches.total_ghg_emissions_intensity_kgco2e_ft2),
-  site_eui_kbtu_ft2: d3.scale.linear().range(colorSwatches.site_eui_kbtu_ft2)
+  site_eui_kbtu_ft2: d3.scale.linear().range(colorSwatches.site_eui_kbtu_ft2),
+  ranking: d3.scale.threshold().range(colorSwatches.total_ghg_emissions_intensity_kgco2e_ft2)
 }
 
 /* use soda-js to query */
@@ -110,7 +111,10 @@ var ghgHistogram = histogramChart()
 
 var euiChartElement = d3.select('#eui-quartileschart')
 
-
+let ringChartElement = d3.select('#energy-star-score-radial')
+let rankRingChart = ringChart()
+  .width(100)
+  .height(100)
 
 
 
@@ -274,11 +278,14 @@ function handlePropertyTypeResponse(rows) {
   let euiVals = objArrayToSortedNumArray(categoryData,'latest_site_eui_kbtu_ft2')
   euiVals = euiVals.filter(function (d) { return d > 1 && d < 1000 })
 
+  singleBuildingData.rank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
+
   /* set color domains */
   var estarQuartiles = arrayQuartiles(estarVals)
   color.energy_star_score.domain(estarQuartiles)
   color.total_ghg_emissions_intensity_kgco2e_ft2.domain(arrayQuartiles(ghgVals))
   color.site_eui_kbtu_ft2.domain(arrayQuartiles(euiVals))
+  color.ranking.domain([ 0.25*singleBuildingData.rank[1], 0.5*singleBuildingData.rank[1], 0.75*singleBuildingData.rank[1] ])
 
   /** Calculate z-score (Wasted a lot of time trying to get JS libs to work here, seems to be a lot easer to
   *                      explicitly calculat it--admittedly, it could be me as I'm not super JavaScript savvy)
@@ -322,50 +329,10 @@ function handlePropertyTypeResponse(rows) {
 
   populateInfoBoxes(singleBuildingData, categoryData, floorAreaRange)
 
-  /**
-   * Use unpolished code for ring chart:
-   */
-  var ringRange = [0,100];
-  var ringHeight = 100;
-  var ringWidth = 100;
-  var ringThick = 8;
-  var ringRadius = d3.min([ringHeight,ringWidth])/2
+  /* draw ring chart for ranking */
+  rankRingChart.colorScale(color.ranking)
+  ringChartElement.datum([singleBuildingData.rank]).call(rankRingChart)
 
-  var arc = d3.svg.arc()
-  .outerRadius(ringRadius)
-  .innerRadius(ringRadius - ringThick)
-  .startAngle(0)
-
-  var euirank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
-
-  var ringElement = d3.select('#energy-star-score-radial')
-  var ringSvg = ringElement.append("svg")
-  .attr("width", ringWidth)
-  .attr("height", ringHeight)
-  .append("g")
-  .attr("transform", "translate(" + ringWidth / 2 + "," + ringHeight / 2 + ")");
-
-  var bg = ringSvg.append('path')
-  .datum({ endAngle: 2 * Math.PI })
-  .attr('fill', '#c6c6c6')
-  .attr('d', arc)
-
-  var fg = ringSvg.append('path')
-  .datum({ endAngle:  arcAngle(euirank[0]) })
-  .attr('fill', function(d){return color.energy_star_score(euirank[0]) })
-  .attr('d', arc)
-
-  // ringSvg.append('text').text('out of 100')
-  ringSvg.append('text')
-      .attr('text-anchor', 'middle')
-      .attr('alignment-baseline', 'middle')
-      .text(euirank[0] + ' out of 100')
-
-  function arcAngle(value, max){
-    max = max || 100
-    return (2*Math.PI*value)/max
-  }
-  /* end unpolished code for ring chart */
   $('#view-load').addClass('hidden')
   $('#view-content').removeClass('hidden')
 }

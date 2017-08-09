@@ -338,28 +338,32 @@ function handlePropertyTypeResponse(rows) {
 
   var euirank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
 
-  var ringElement = d3.select('#energy-star-score-radial')
-  var ringSvg = ringElement.append("svg")
-  .attr("width", ringWidth)
-  .attr("height", ringHeight)
-  .append("g")
-  .attr("transform", "translate(" + ringWidth / 2 + "," + ringHeight / 2 + ")");
+  /* This implements a ring chart. 
+     Keeping code for now in case we need to re-implement.
+  */
 
-  var bg = ringSvg.append('path')
-  .datum({ endAngle: 2 * Math.PI })
-  .attr('fill', '#c6c6c6')
-  .attr('d', arc)
+  // var ringElement = d3.select('#energy-star-score-radial')
+  // var ringSvg = ringElement.append("svg")
+  // .attr("width", ringWidth)
+  // .attr("height", ringHeight)
+  // .append("g")
+  // .attr("transform", "translate(" + ringWidth / 2 + "," + ringHeight / 2 + ")");
 
-  var fg = ringSvg.append('path')
-  .datum({ endAngle:  arcAngle(euirank[0]) })
-  .attr('fill', function(d){return color.energy_star_score(euirank[0]) })
-  .attr('d', arc)
+  // var bg = ringSvg.append('path')
+  // .datum({ endAngle: 2 * Math.PI })
+  // .attr('fill', '#c6c6c6')
+  // .attr('d', arc)
 
-  // ringSvg.append('text').text('out of 100')
-  ringSvg.append('text')
-      .attr('text-anchor', 'middle')
-      .attr('alignment-baseline', 'middle')
-      .text(euirank[0] + ' out of 100')
+  // var fg = ringSvg.append('path')
+  // .datum({ endAngle:  arcAngle(euirank[0]) })
+  // .attr('fill', function(d){return color.energy_star_score(euirank[0]) })
+  // .attr('d', arc)
+
+  // // ringSvg.append('text').text('out of 100')
+  // ringSvg.append('text')
+  //     .attr('text-anchor', 'middle')
+  //     .attr('alignment-baseline', 'middle')
+  //     .text(euirank[0] + ' out of 100')
 
   function arcAngle(value, max){
     max = max || 100
@@ -511,7 +515,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
 
   let euirank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
 
-  d3.select('#building-ranking').text(euirank[0])
+  d3.selectAll('.building-ranking').text(euirank[0])
   d3.select('#total-building-type').text(euirank[1])
 
   var complianceStatusIndicator = (singleBuildingData.latest_benchmark == "Complied") ?

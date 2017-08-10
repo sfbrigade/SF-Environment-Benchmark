@@ -4,6 +4,7 @@
 const DATASOURCE = '75rg-imyz' // 'j2j3-acqj'
 const METRICS = ['benchmark','energy_star_score','site_eui_kbtu_ft2','source_eui_kbtu_ft2','percent_better_than_national_median_site_eui','percent_better_than_national_median_source_eui','total_ghg_emissions_metric_tons_co2e','total_ghg_emissions_intensity_kgco2e_ft2','weather_normalized_site_eui_kbtu_ft2','weather_normalized_source_eui_kbtu_ft2']
 const LIMITEDMETRICS = ['latest_energy_star_score', 'latest_total_ghg_emissions_metric_tons_co2e', 'latest_site_eui_kbtu_ft2']
+const RANKINGMETRIC = 'latest_weather_normalized_site_eui_kbtu_ft2'
 const BLK = /(.+)\//
 const LOT = /[\/\.](.+)/
 
@@ -289,6 +290,8 @@ function handlePropertyTypeResponse(rows) {
   // categoryData.zscoreVal = jstat.zscore(singleBuildingData.latest_energy_star_score, estarVals)
   categoryData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
 
+  singleBuildingData.localRank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC)
+
   /* draw histogram for energy star */
   estarHistogram
     .colorScale(color.energy_star_score)
@@ -306,6 +309,7 @@ function handlePropertyTypeResponse(rows) {
     .bins(100)
     .xAxisLabel('GHG Emissions (Metric Tons CO2)')
     .yAxisLabel('Buildings')
+    // .tickFormat(d3.format("d"))
   ghgHistogramElement.datum(ghgVals).call(ghgHistogram)
   ghgHistogramElement.call(addHighlightLine,singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e,ghgHistogram,singleBuildingData.building_name)
 
@@ -336,7 +340,7 @@ function handlePropertyTypeResponse(rows) {
   .innerRadius(ringRadius - ringThick)
   .startAngle(0)
 
-  var euirank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
+
 
   var ringElement = d3.select('#energy-star-score-radial')
   var ringSvg = ringElement.append("svg")
@@ -351,15 +355,15 @@ function handlePropertyTypeResponse(rows) {
   .attr('d', arc)
 
   var fg = ringSvg.append('path')
-  .datum({ endAngle:  arcAngle(euirank[0]) })
-  .attr('fill', function(d){return color.energy_star_score(euirank[0]) })
+  .datum({ endAngle:  arcAngle(singleBuildingData.localRank[0]) })
+  .attr('fill', function(d){return color.energy_star_score(singleBuildingData.localRank[0]) })
   .attr('d', arc)
 
   // ringSvg.append('text').text('out of 100')
   ringSvg.append('text')
       .attr('text-anchor', 'middle')
       .attr('alignment-baseline', 'middle')
-      .text(euirank[0] + ' out of 100')
+      .text(singleBuildingData.localRank[0] + ' out of ' + singleBuildingData.localRank[1])
 
   function arcAngle(value, max){
     max = max || 100
@@ -495,11 +499,15 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.select('#building-energy-star-score').text(singleBuildingData.latest_energy_star_score)
   d3.select('#building-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
   d3.selectAll('.building-ghg-emissions ').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
+
+  if ( !singleBuildingData.latest_energy_star_score ) {
+    d3.select('#estar-text').html(`The national <span class="building-type-lower">hotel</span> median energy star score is 50.`)
+  }
+
   d3.selectAll('.building-type-lower').text(singleBuildingData.property_type_self_selected.toLowerCase())
   d3.selectAll('.building-type-upper').text(singleBuildingData.property_type_self_selected.toUpperCase())
 
   d3.select('#building-floor-area').text(numberWithCommas(singleBuildingData.floor_area))
-  // d3.selectAll('.foo-building-compliance').text(singleBuildingData.)
   d3.selectAll('.building-name').text(singleBuildingData.building_name)
   d3.select('#building-street-address').text(singleBuildingData.building_address)
   d3.select('#building-city-address').text(
@@ -509,10 +517,8 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   )
   d3.selectAll('.building-type-sq-ft').text(numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]))
 
-  let euirank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
-
-  d3.select('#building-ranking').text(euirank[0])
-  d3.select('#total-building-type').text(euirank[1])
+  d3.select('#building-ranking').text(singleBuildingData.localRank[0])
+  d3.select('#total-building-type').text(singleBuildingData.localRank[1])
 
   var complianceStatusIndicator = (singleBuildingData.latest_benchmark == "Complied") ?
     ' <i class="fa fa-check" aria-hidden="true"></i>'
@@ -526,7 +532,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   // the following doesn't quite work:
   $("#local-ranking-tooltip").attr("data-original-title",
     "Based on score and energy use intensity, " + singleBuildingData.building_name +"'s energy use ranks #"
-    + euirank[0] +" out of " + euirank[1] + " " + singleBuildingData.property_type_self_selected.toLowerCase() +
+    + singleBuildingData.localRank[0] +" out of " + singleBuildingData.localRank[1] + " " + singleBuildingData.property_type_self_selected.toLowerCase() +
     " buildings sized between " + numberWithCommas(floorAreaRange[0])
     + '-' + numberWithCommas(floorAreaRange[1]) + " square feet.")
 }
@@ -559,7 +565,8 @@ function cleanData (inputData) {
   var filtered = inputData.filter(function(el){
     var cond1 = (el.pct_change_one_year_site_eui_kbtu_ft2 <= 100) && (el.pct_change_one_year_site_eui_kbtu_ft2 >= -80)
     var cond2 = (el.pct_change_two_year_site_eui_kbtu_ft2 <= 100) && (el.pct_change_two_year_site_eui_kbtu_ft2 >= -80)
-    return (cond1 && cond2)
+    var cond3 = el[RANKINGMETRIC] !== undefined
+    return (cond1 && cond2 & cond3)
   })
   return filtered
 }

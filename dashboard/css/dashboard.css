@@ -53,12 +53,6 @@ body {
 	background-color: #FFFFFF;
 }
 
-/*@media screen and (max-width: 968px) {
-	.nav-pills>li {
-		width: 100%%;
-		font-size: 12px;
-	}
-}*/
 .fa.fa-building {
 	padding-right: 3%;
 	font-size: 25px;

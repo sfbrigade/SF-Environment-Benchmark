@@ -24,7 +24,6 @@ function ringChart() {
       svg
         .attr("width", width)
         .attr("height", height)
-        .append("g")
 
       let g = svg.select("g")
               .attr("transform", "translate(" +  (width / 2) + "," + (height / 2) + ")")
@@ -34,7 +33,6 @@ function ringChart() {
         .attr('fill', '#c6c6c6')
         .attr('d', arc)
 
-
       let fg = g.selectAll('.arc').data(data)
       fg.enter().append('path').attr("class", "arc")
 
@@ -43,14 +41,20 @@ function ringChart() {
         .datum(function(d){ return { endAngle: arcAngle(d) } })//TODO: do this using proper binding
         .attr('d', arc)
 
-      let label = g.selectAll('.label').data(data)
-      label.enter().append('text').attr('class','label')
-          .attr('text-anchor', 'middle')
-          .attr('alignment-baseline', 'middle')
-          .text(function(d){
-            return `${d[0]} out of ${d[1]}`
-          })
+      let ranking = g.selectAll('.ranking').data(data)
+      ranking.enter().append('g').attr('class','ranking')
 
+      ranking.append('text').attr('text-anchor', 'middle')
+          .attr('alignment-baseline', 'baseline')
+          .attr('font-size','2.5em')
+          .text(function(d){
+            return `#${d[0]}`
+          })
+      ranking.append('text').attr('text-anchor', 'middle')
+          .attr('alignment-baseline', 'hanging')
+          .text(function(d){
+            return `out of ${d[1]}`
+          })
     })
 
   }

@@ -266,6 +266,7 @@ function handleSingleBuildingResponse(rows) {
 * @param {array} rows - returned from consumer.query.getRows
 */
 function handlePropertyTypeResponse(rows) {
+  //TODO: parseSingleRecord finds the "latest" value for each metric, so the comparisons between buildings are not necessarially within the same year.  perhaps parseSingleRecord should accept a param for year, passing to "latest" which finds that particular year instead of the "latest" metric. OR the propertyQuery call inside handleSingleBuildingResponse should take a param for year that only requests records which are not null for the individual building's "latest" metric year
   categoryData = rows.map(parseSingleRecord)    // save data in global var
   categoryData = cleanData(categoryData)        // clean data according to SFENV's criteria
   categoryData = apiDataToArray( categoryData ) // filter out unwanted data
@@ -279,14 +280,14 @@ function handlePropertyTypeResponse(rows) {
   let euiVals = objArrayToSortedNumArray(categoryData,'latest_site_eui_kbtu_ft2')
   euiVals = euiVals.filter(function (d) { return d > 1 && d < 1000 })
 
-  singleBuildingData.rank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
+  singleBuildingData.localRank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC)
 
   /* set color domains */
   var estarQuartiles = arrayQuartiles(estarVals)
   color.energy_star_score.domain(estarQuartiles)
   color.total_ghg_emissions_intensity_kgco2e_ft2.domain(arrayQuartiles(ghgVals))
   color.site_eui_kbtu_ft2.domain(arrayQuartiles(euiVals))
-  color.ranking.domain([ 0.25*singleBuildingData.rank[1], 0.5*singleBuildingData.rank[1], 0.75*singleBuildingData.rank[1] ])
+  color.ranking.domain([ 0.25*singleBuildingData.localRank[1], 0.5*singleBuildingData.localRank[1], 0.75*singleBuildingData.localRank[1] ])
 
   /** Calculate z-score (Wasted a lot of time trying to get JS libs to work here, seems to be a lot easer to
   *                      explicitly calculat it--admittedly, it could be me as I'm not super JavaScript savvy)
@@ -296,8 +297,6 @@ function handlePropertyTypeResponse(rows) {
   */
   // categoryData.zscoreVal = jstat.zscore(singleBuildingData.latest_energy_star_score, estarVals)
   // categoryData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
-
-  singleBuildingData.localRank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC)
 
   /* draw histogram for energy star */
   estarHistogram
@@ -336,7 +335,7 @@ function handlePropertyTypeResponse(rows) {
   /* draw ring chart for ranking */
   if (singleBuildingData.localRank) {
     rankRingChart.colorScale(color.ranking)
-    ringChartElement.datum([singleBuildingData.rank]).call(rankRingChart)
+    ringChartElement.datum([singleBuildingData.localRank]).call(rankRingChart)
   } else {
     // the building is not rankable: the % change in eui either increased by more than 100 or decreased by more than 80 over the previous 2 years
   }

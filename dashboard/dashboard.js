@@ -4,6 +4,7 @@
 const DATASOURCE = '75rg-imyz' // 'j2j3-acqj'
 const METRICS = ['benchmark','energy_star_score','site_eui_kbtu_ft2','source_eui_kbtu_ft2','percent_better_than_national_median_site_eui','percent_better_than_national_median_source_eui','total_ghg_emissions_metric_tons_co2e','total_ghg_emissions_intensity_kgco2e_ft2','weather_normalized_site_eui_kbtu_ft2','weather_normalized_source_eui_kbtu_ft2']
 const LIMITEDMETRICS = ['latest_energy_star_score', 'latest_total_ghg_emissions_metric_tons_co2e', 'latest_site_eui_kbtu_ft2']
+const RANKINGMETRIC = 'latest_energy_star_score'
 const BLK = /(.+)\//
 const LOT = /[\/\.](.+)/
 
@@ -294,7 +295,10 @@ function handlePropertyTypeResponse(rows) {
   *         - simple-statistics: https://github.com/simple-statistics/simple-statistics
   */
   // categoryData.zscoreVal = jstat.zscore(singleBuildingData.latest_energy_star_score, estarVals)
-  categoryData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
+  // categoryData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
+
+  //TODO: handle case where building is not ranked (due to cleanData() criteria)
+  singleBuildingData.localRank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC)
 
   /* draw histogram for energy star */
   estarHistogram
@@ -313,6 +317,7 @@ function handlePropertyTypeResponse(rows) {
     .bins(100)
     .xAxisLabel('GHG Emissions (Metric Tons CO2)')
     .yAxisLabel('Buildings')
+    // .tickFormat(d3.format("d"))
   ghgHistogramElement.datum(ghgVals).call(ghgHistogram)
   ghgHistogramElement.call(addHighlightLine,singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e,ghgHistogram,singleBuildingData.building_name)
 
@@ -323,7 +328,7 @@ function handlePropertyTypeResponse(rows) {
     .width(euiWidth)
     .height(150)
     .colorScale(color.site_eui_kbtu_ft2)
-    .margin({top: 20, right: 50, bottom: 20, left: 50})
+    .margin({top: 20, right: 80, bottom: 20, left: 50})
   euiChartElement.datum(euiVals).call(euiChart)
   euiChartElement.call(addHighlightLine, singleBuildingData.latest_site_eui_kbtu_ft2, euiChart, singleBuildingData.building_name)
 
@@ -381,13 +386,17 @@ function latest (metric, entry) {
       entry['latest_'+metric] = entry['latest_'+metric] || 'N/A'
       entry['latest_'+metric+'_year'] = entry['latest_'+metric+'_year'] || 'N/A'
     }
-    if (typeof +entry['latest_'+metric] === 'number') {
+    if ( !isNaN(+entry['latest_'+metric]) ) {
       entry['latest_'+metric] = roundToTenth(+entry['latest_'+metric])
     }
   })
   if (metric !== 'benchmark') {
     entry['pct_change_one_year_'+metric] = calcPctChange(entry, metric, 1)
     entry['pct_change_two_year_'+metric] = calcPctChange(entry, metric, 2)
+  }
+  if (metric === 'benchmark') {
+    var prevYear = 'benchmark_' + (entry.latest_benchmark_year - 1) + '_status'
+    entry['prev_year_benchmark'] = entry[prevYear]
   }
   return entry
 }
@@ -460,13 +469,18 @@ function apiDataToArray (data) {
 */
 function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.select('#building-energy-star-score').text(singleBuildingData.latest_energy_star_score)
+  d3.selectAll('.building-energy-star-score-year').text(singleBuildingData.latest_energy_star_score_year)
   d3.select('#building-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
   d3.selectAll('.building-ghg-emissions ').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
+
+  if ( !singleBuildingData.latest_energy_star_score ) {
+    d3.select('#estar-text').html(`The national <span class="building-type-lower">hotel</span> median energy star score is 50.`)
+  }
+
   d3.selectAll('.building-type-lower').text(singleBuildingData.property_type_self_selected.toLowerCase())
   d3.selectAll('.building-type-upper').text(singleBuildingData.property_type_self_selected.toUpperCase())
 
   d3.select('#building-floor-area').text(numberWithCommas(singleBuildingData.floor_area))
-  // d3.selectAll('.foo-building-compliance').text(singleBuildingData.)
   d3.selectAll('.building-name').text(singleBuildingData.building_name)
   d3.select('#building-street-address').text(singleBuildingData.building_address)
   d3.select('#building-city-address').text(
@@ -476,15 +490,20 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   )
   d3.selectAll('.building-type-sq-ft').text(numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]))
 
-  let euirank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
+  d3.select('#building-ranking').text(singleBuildingData.localRank[0])
+  d3.select('#total-building-type').text(singleBuildingData.localRank[1])
 
-  d3.select('#building-ranking').text(euirank[0])
-  d3.select('#total-building-type').text(euirank[1])
+  var complianceStatusIndicator = `${singleBuildingData.latest_benchmark_year}: ${complianceStatusString(singleBuildingData.latest_benchmark)} <br>
+  ${singleBuildingData.latest_benchmark_year - 1}: ${complianceStatusString(singleBuildingData.prev_year_benchmark)}`
 
-  var complianceStatusIndicator = (singleBuildingData.latest_benchmark == "Complied") ?
-    ' <i class="fa fa-check" aria-hidden="true"></i>'
-    :
-    ' <i class="fa fa-times attn" aria-hidden="true"></i>'
+  function complianceStatusString(status){
+    var indicator = (status == "Complied") ?
+      ' <i class="fa fa-check" aria-hidden="true"></i>'
+      :
+      ' <i class="fa fa-times attn" aria-hidden="true"></i>'
+    return `${indicator} ${status}`
+  }
+
   d3.select('#compliance-status').html(complianceStatusIndicator)
 
   d3.select('.ranking').text('LOCAL RANKING ' + singleBuildingData.latest_benchmark_year)
@@ -493,7 +512,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   // the following doesn't quite work:
   $("#local-ranking-tooltip").attr("data-original-title",
     "Based on score and energy use intensity, " + singleBuildingData.building_name +"'s energy use ranks #"
-    + euirank[0] +" out of " + euirank[1] + " " + singleBuildingData.property_type_self_selected.toLowerCase() +
+    + singleBuildingData.localRank[0] +" out of " + singleBuildingData.localRank[1] + " " + singleBuildingData.property_type_self_selected.toLowerCase() +
     " buildings sized between " + numberWithCommas(floorAreaRange[0])
     + '-' + numberWithCommas(floorAreaRange[1]) + " square feet.")
 }
@@ -511,7 +530,9 @@ function rankBuildings (id, bldgArray, prop) {
     return +a[prop] - +b[prop]
   })
 
-  let rank = sorted.findIndex(function(el){return el.id === id}) + 1
+  let rank = sorted.findIndex(function(el){return el.id === id})
+  if (rank === -1) return false //indicates building not in ranking array
+  rank += 1
   let count = sorted.length
 
   return [rank, count]
@@ -526,7 +547,8 @@ function cleanData (inputData) {
   var filtered = inputData.filter(function(el){
     var cond1 = (el.pct_change_one_year_site_eui_kbtu_ft2 <= 100) && (el.pct_change_one_year_site_eui_kbtu_ft2 >= -80)
     var cond2 = (el.pct_change_two_year_site_eui_kbtu_ft2 <= 100) && (el.pct_change_two_year_site_eui_kbtu_ft2 >= -80)
-    return (cond1 && cond2)
+    var cond3 = el[RANKINGMETRIC] !== undefined
+    return (cond1 && cond2 & cond3)
   })
   return filtered
 }
@@ -591,6 +613,10 @@ function addHighlightLine (selection, data, chart, label) {
     {x:x(data), y: height - margin.bottom - margin.top}
   ]
 
+  var moreThanHalf = ( x(data) < chart.width()/2 ) ? false : true
+  var textPos = moreThanHalf ? x(data)-5 : x(data)+5
+  var textAnchor = moreThanHalf ? 'end' : 'start'
+
   hl.enter().append("path")
         .attr('class', 'highlight')
         .attr("d", lineFunction(hlline))
@@ -599,53 +625,15 @@ function addHighlightLine (selection, data, chart, label) {
         .attr("stroke-dasharray", "5,3")
         .attr("fill", "none");
   hl.enter().append("text")
-        .attr('x', x(data)+5)
+        .attr('x', textPos)
         .attr('y', 16)
-        .attr('text-anchor', 'top')
+        .attr('text-anchor', textAnchor)
         .attr('alignment-baseline', 'top')
         .attr("fill", colorSwatches.highlight)
         .text(label)
   hl.exit().remove()
 }
 
-function addHighlightLine (selection, data, chart, label) {
-  label = (label != undefined) ? `${label.toUpperCase()} - ${data}` : `${data}`
-  if( isNaN(data) ) data = -100
-  var x = chart.xScale(),
-      y = chart.yScale(),
-      margin = chart.margin(),
-      width = chart.width(),
-      height = chart.height()
-  var svg = selection.select('svg')
-  var hl = svg.select("g").selectAll('.highlight').data([data])
-
-  var lineFunction = d3.svg.line()
-           .x(function(d) { return d.x; })
-           .y(function(d) { return d.y; })
-           .interpolate("linear")
-
-  var hlline = [
-     {x:x(data), y:0},
-     {x:x(data), y: height - margin.bottom - margin.top}
-   ]
-
-  hl.enter().append("path")
-      .attr('class', 'highlight')
-      .attr("d", lineFunction(hlline))
-      .attr("stroke", colorSwatches.highlight)
-      .attr("stroke-width", 3)
-      .attr("stroke-dasharray", "5,3")
-      .attr("fill", "none");
-  hl.enter().append("text")
-      .attr('x', x(data)+5)
-      .attr('y', 16)
-      .attr('text-anchor', 'top')
-      .attr('alignment-baseline', 'top')
-      .attr("fill", colorSwatches.highlight)
-      .text(label)
-
-  hl.exit().remove()
-}
 
 function arrayQuartiles (sortedArr) {
   return [

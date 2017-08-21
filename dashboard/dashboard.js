@@ -5,6 +5,7 @@ const DATASOURCE = '75rg-imyz' // 'j2j3-acqj'
 const METRICS = ['benchmark','energy_star_score','site_eui_kbtu_ft2','source_eui_kbtu_ft2','percent_better_than_national_median_site_eui','percent_better_than_national_median_source_eui','total_ghg_emissions_metric_tons_co2e','total_ghg_emissions_intensity_kgco2e_ft2','weather_normalized_site_eui_kbtu_ft2','weather_normalized_source_eui_kbtu_ft2']
 const LIMITEDMETRICS = ['latest_energy_star_score', 'latest_total_ghg_emissions_metric_tons_co2e', 'latest_site_eui_kbtu_ft2']
 const RANKINGMETRIC = 'latest_energy_star_score'
+const RANKINGMETRICTIEBREAK ='latest_site_eui_kbtu_ft2'
 const BLK = /(.+)\//
 const LOT = /[\/\.](.+)/
 
@@ -280,7 +281,7 @@ function handlePropertyTypeResponse(rows) {
   let euiVals = objArrayToSortedNumArray(categoryData,'latest_site_eui_kbtu_ft2')
   euiVals = euiVals.filter(function (d) { return d > 1 && d < 1000 })
 
-  singleBuildingData.localRank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC)
+  singleBuildingData.localRank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC, RANKINGMETRICTIEBREAK)
 
   /* set color domains */
   var estarQuartiles = arrayQuartiles(estarVals)
@@ -525,12 +526,16 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
 * @param {string} id - building "ID" number
 * @param {array} bldgArray - processed/simplified building data
 * @param {string} prop - the property to rank by
+* @param {string} prop2 - the property to rank by if a[prop] === b[prop]
 * @return {array} [rank, count]
 */
-function rankBuildings (id, bldgArray, prop) {
-  //TODO: rank the buildings in te
+function rankBuildings (id, bldgArray, prop, prop2) {
   let sorted = bldgArray.sort(function(a,b){
-    return +a[prop] - +b[prop]
+    if( +a[prop] === +b[prop] ) {
+      return +a[prop2] - +b[prop2]
+    }else {
+      return +a[prop] - +b[prop]
+    }
   })
 
   let rank = sorted.findIndex(function(el){return el.id === id})

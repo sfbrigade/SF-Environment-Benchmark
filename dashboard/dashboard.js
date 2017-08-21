@@ -473,7 +473,8 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.select('#building-energy-star-score').text(singleBuildingData.latest_energy_star_score)
   d3.selectAll('.building-energy-star-score-year').text(singleBuildingData.latest_energy_star_score_year)
   d3.select('#building-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
-  d3.selectAll('.building-ghg-emissions ').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
+  d3.selectAll('.building-ghg-emissions').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
+  d3.selectAll('.building-ghg-emissions-year').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e_year)
 
   if ( !singleBuildingData.latest_energy_star_score ) {
     d3.select('#estar-text').html(`The national <span class="building-type-lower">hotel</span> median energy star score is 50.`)

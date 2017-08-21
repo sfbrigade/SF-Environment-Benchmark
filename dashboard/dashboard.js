@@ -517,8 +517,9 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
 
   let euirank = rankBuildings(singleBuildingData.ID, categoryData, 'latest_weather_normalized_site_eui_kbtu_ft2')
 
-  d3.select('#building-ranking').text(euirank[0])
-  d3.select('#total-building-type').text(euirank[1])
+  //TODO put the following 2 lines within the `if ( !singleBuildingData.latest_energy_star_score ) {}` block once merged with #97
+  d3.selectAll('.building-ranking-text').text(euirank[0])
+  d3.selectAll('.total-building-type').text(euirank[1])
 
   var complianceStatusIndicator = `${singleBuildingData.latest_benchmark_year}: ${complianceStatusString(singleBuildingData.latest_benchmark)} <br>
   ${singleBuildingData.latest_benchmark_year - 1}: ${complianceStatusString(singleBuildingData.prev_year_benchmark)}`

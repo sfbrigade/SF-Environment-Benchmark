@@ -297,7 +297,6 @@ function handlePropertyTypeResponse(rows) {
   // categoryData.zscoreVal = jstat.zscore(singleBuildingData.latest_energy_star_score, estarVals)
   // categoryData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
 
-  //TODO: handle case where building is not ranked (due to cleanData() criteria)
   singleBuildingData.localRank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC)
 
   /* draw histogram for energy star */
@@ -335,8 +334,12 @@ function handlePropertyTypeResponse(rows) {
   populateInfoBoxes(singleBuildingData, categoryData, floorAreaRange)
 
   /* draw ring chart for ranking */
-  rankRingChart.colorScale(color.ranking)
-  ringChartElement.datum([singleBuildingData.rank]).call(rankRingChart)
+  if (singleBuildingData.localRank) {
+    rankRingChart.colorScale(color.ranking)
+    ringChartElement.datum([singleBuildingData.rank]).call(rankRingChart)
+  } else {
+    // the building is not rankable: the % change in eui either increased by more than 100 or decreased by more than 80 over the previous 2 years
+  }
 
   $('#view-load').addClass('hidden')
   $('#view-content').removeClass('hidden')

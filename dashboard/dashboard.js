@@ -95,8 +95,7 @@ var estarWidth = 500 //parseInt(estarHistogramElement.style('width'))
 var estarHistogram = histogramChart()
   .width(estarWidth)
   .height(200)
-  .range([0,100])
-  .bins(50)
+  .range([0,110])
   .tickFormat(d3.format(',d'))
 
 var ghgHistogramElement = d3.select('#ghg-emissions-histogram')
@@ -105,7 +104,6 @@ var ghgHistogram = histogramChart()
   .width(ghgWidth)
   .height(200)
   .range([0,1650])
-  .bins(100)
   .tickFormat(d3.format(',d'))
 
 var euiChartElement = d3.select('#eui-quartileschart')
@@ -292,7 +290,7 @@ function handlePropertyTypeResponse(rows) {
   /* draw histogram for energy star */
   estarHistogram
     .colorScale(color.energy_star_score)
-    .bins(100)
+    .bins(20)
     .xAxisLabel('Energy Star Score')
     .yAxisLabel('Buildings')
   estarHistogramElement.datum(estarVals).call(estarHistogram)

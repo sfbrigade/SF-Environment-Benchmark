@@ -4,7 +4,7 @@
 const DATASOURCE = '75rg-imyz' // 'j2j3-acqj'
 const METRICS = ['benchmark','energy_star_score','site_eui_kbtu_ft2','source_eui_kbtu_ft2','percent_better_than_national_median_site_eui','percent_better_than_national_median_source_eui','total_ghg_emissions_metric_tons_co2e','total_ghg_emissions_intensity_kgco2e_ft2','weather_normalized_site_eui_kbtu_ft2','weather_normalized_source_eui_kbtu_ft2']
 const LIMITEDMETRICS = ['latest_energy_star_score', 'latest_total_ghg_emissions_metric_tons_co2e', 'latest_site_eui_kbtu_ft2']
-const RANKINGMETRIC = 'latest_weather_normalized_site_eui_kbtu_ft2'
+const RANKINGMETRIC = 'latest_energy_star_score'
 const BLK = /(.+)\//
 const LOT = /[\/\.](.+)/
 
@@ -288,8 +288,9 @@ function handlePropertyTypeResponse(rows) {
   *         - simple-statistics: https://github.com/simple-statistics/simple-statistics
   */
   // categoryData.zscoreVal = jstat.zscore(singleBuildingData.latest_energy_star_score, estarVals)
-  categoryData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
+  // categoryData.zscoreVal = (singleBuildingData.latest_energy_star_score - d3.mean(estarVals)) / d3.deviation(estarVals)
 
+  //TODO: handle case where building is not ranked (due to cleanData() criteria)
   singleBuildingData.localRank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC)
 
   /* draw histogram for energy star */
@@ -562,7 +563,9 @@ function rankBuildings (id, bldgArray, prop) {
     return +a[prop] - +b[prop]
   })
 
-  let rank = sorted.findIndex(function(el){return el.id === id}) + 1
+  let rank = sorted.findIndex(function(el){return el.id === id})
+  if (rank === -1) return false //indicates building not in ranking array
+  rank += 1
   let count = sorted.length
 
   return [rank, count]

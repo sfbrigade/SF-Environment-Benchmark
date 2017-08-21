@@ -127,7 +127,7 @@
                 		<div class="links">
 	                		<div class="row link">
 	                			<a href="https://sfenvironment.org/energy/energy-efficiency/commercial-and-multifamily-properties/existing-commercial-buildings-energy-performance-ordinance">What is the Existing Commercial Buildings Ordinance?</a>
-	                		</div>
+	                		</div><br>
 	                		<div class="row link">
 	                			<a href="https://sfenvironment.org/sites/default/files/fliers/files/sfe_gb_ecb_benchmark_instructions.pdf">How to submit benchmarking data</a>
 	                		</div>
@@ -170,6 +170,9 @@
 	        			<div class="col-xs-8">
 	        				<!-- <div class="loading">Loading&mdash;</div> -->
 	        				<div id="energy-star-score-histogram" class="histogram-chart"></div>
+									<div id="demo" class="hidden">
+										<input type="number" id="change-estar-input" value="100"><button id="change-estar">change bin numbers</button>
+									</div>
 	        			</div>
 	        			<div class="col-xs-2"></div>
 	        		</div>
@@ -203,5 +206,6 @@
 	<script src="../js/histogram-chart.js"></script>
 	<script src="../js/quartiles-chart.js"></script>
 	<script src="dashboard.js"></script>
+	<script src="demo.js"></script>
 </body>
 </html>

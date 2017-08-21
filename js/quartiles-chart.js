@@ -74,11 +74,13 @@ function quartilesChart() {
           })
           .style('alignment-baseline', 'before-edge')
           .attr("transform", function(d,i){
-            return "translate(" + x(d) + "," + y(0) + ")"
+            if (i === 2) { return "translate(" + x(d) + "," + y(0.15) + ")"}
+            else { return "translate(" + x(d) + "," + y(0) + ")" }
           })
           .text(function(d,i){
             var val = d
             if (i === 2) val += '-Median EUI'
+            if (i === 4) val += ' (kbtu/ft2)'
             return val
           })
     });

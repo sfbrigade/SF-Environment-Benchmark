@@ -96,7 +96,7 @@ var estarWidth = 500 //parseInt(estarHistogramElement.style('width'))
 var estarHistogram = histogramChart()
   .width(estarWidth)
   .height(200)
-  .range([0,104])
+  .range([0,100])
   .bins(50)
   .tickFormat(d3.format(',d'))
 
@@ -293,7 +293,11 @@ function handlePropertyTypeResponse(rows) {
   singleBuildingData.localRank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC)
 
   /* draw histogram for energy star */
-  estarHistogram.colorScale(color.energy_star_score).bins(100).xAxisLabel('Energy Star Score').yAxisLabel('Buildings')
+  estarHistogram
+    .colorScale(color.energy_star_score)
+    .bins(100)
+    .xAxisLabel('Energy Star Score')
+    .yAxisLabel('Buildings')
   estarHistogramElement.datum(estarVals).call(estarHistogram)
 
   estarHistogramElement.call(addHighlightLine,singleBuildingData.latest_energy_star_score, estarHistogram,singleBuildingData.building_name)
@@ -316,7 +320,7 @@ function handlePropertyTypeResponse(rows) {
     .width(euiWidth)
     .height(150)
     .colorScale(color.site_eui_kbtu_ft2)
-    .margin({top: 20, right: 50, bottom: 20, left: 50})
+    .margin({top: 20, right: 80, bottom: 20, left: 50})
   euiChartElement.datum(euiVals).call(euiChart)
   euiChartElement.call(addHighlightLine, singleBuildingData.latest_site_eui_kbtu_ft2, euiChart, singleBuildingData.building_name)
 
@@ -414,13 +418,17 @@ function latest (metric, entry) {
       entry['latest_'+metric] = entry['latest_'+metric] || 'N/A'
       entry['latest_'+metric+'_year'] = entry['latest_'+metric+'_year'] || 'N/A'
     }
-    if (typeof +entry['latest_'+metric] === 'number') {
+    if ( !isNaN(+entry['latest_'+metric]) ) {
       entry['latest_'+metric] = roundToTenth(+entry['latest_'+metric])
     }
   })
   if (metric !== 'benchmark') {
     entry['pct_change_one_year_'+metric] = calcPctChange(entry, metric, 1)
     entry['pct_change_two_year_'+metric] = calcPctChange(entry, metric, 2)
+  }
+  if (metric === 'benchmark') {
+    var prevYear = 'benchmark_' + (entry.latest_benchmark_year - 1) + '_status'
+    entry['prev_year_benchmark'] = entry[prevYear]
   }
   return entry
 }
@@ -493,6 +501,7 @@ function apiDataToArray (data) {
 */
 function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.select('#building-energy-star-score').text(singleBuildingData.latest_energy_star_score)
+  d3.selectAll('.building-energy-star-score-year').text(singleBuildingData.latest_energy_star_score_year)
   d3.select('#building-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
   d3.selectAll('.building-ghg-emissions ').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
 
@@ -516,10 +525,17 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.select('#building-ranking').text(singleBuildingData.localRank[0])
   d3.select('#total-building-type').text(singleBuildingData.localRank[1])
 
-  var complianceStatusIndicator = (singleBuildingData.latest_benchmark == "Complied") ?
-    ' <i class="fa fa-check" aria-hidden="true"></i>'
-    :
-    ' <i class="fa fa-times attn" aria-hidden="true"></i>'
+  var complianceStatusIndicator = `${singleBuildingData.latest_benchmark_year}: ${complianceStatusString(singleBuildingData.latest_benchmark)} <br>
+  ${singleBuildingData.latest_benchmark_year - 1}: ${complianceStatusString(singleBuildingData.prev_year_benchmark)}`
+
+  function complianceStatusString(status){
+    var indicator = (status == "Complied") ?
+      ' <i class="fa fa-check" aria-hidden="true"></i>'
+      :
+      ' <i class="fa fa-times attn" aria-hidden="true"></i>'
+    return `${indicator} ${status}`
+  }
+
   d3.select('#compliance-status').html(complianceStatusIndicator)
 
   d3.select('.ranking').text('LOCAL RANKING ' + singleBuildingData.latest_benchmark_year)
@@ -627,6 +643,10 @@ function addHighlightLine (selection, data, chart, label) {
     {x:x(data), y: height - margin.bottom - margin.top}
   ]
 
+  var moreThanHalf = ( x(data) < chart.width()/2 ) ? false : true
+  var textPos = moreThanHalf ? x(data)-5 : x(data)+5
+  var textAnchor = moreThanHalf ? 'end' : 'start'
+
   hl.enter().append("path")
         .attr('class', 'highlight')
         .attr("d", lineFunction(hlline))
@@ -635,53 +655,15 @@ function addHighlightLine (selection, data, chart, label) {
         .attr("stroke-dasharray", "5,3")
         .attr("fill", "none");
   hl.enter().append("text")
-        .attr('x', x(data)+5)
+        .attr('x', textPos)
         .attr('y', 16)
-        .attr('text-anchor', 'top')
+        .attr('text-anchor', textAnchor)
         .attr('alignment-baseline', 'top')
         .attr("fill", colorSwatches.highlight)
         .text(label)
   hl.exit().remove()
 }
 
-function addHighlightLine (selection, data, chart, label) {
-  label = (label != undefined) ? `${label.toUpperCase()} - ${data}` : `${data}`
-  if( isNaN(data) ) data = -100
-  var x = chart.xScale(),
-      y = chart.yScale(),
-      margin = chart.margin(),
-      width = chart.width(),
-      height = chart.height()
-  var svg = selection.select('svg')
-  var hl = svg.select("g").selectAll('.highlight').data([data])
-
-  var lineFunction = d3.svg.line()
-           .x(function(d) { return d.x; })
-           .y(function(d) { return d.y; })
-           .interpolate("linear")
-
-  var hlline = [
-     {x:x(data), y:0},
-     {x:x(data), y: height - margin.bottom - margin.top}
-   ]
-
-  hl.enter().append("path")
-      .attr('class', 'highlight')
-      .attr("d", lineFunction(hlline))
-      .attr("stroke", colorSwatches.highlight)
-      .attr("stroke-width", 3)
-      .attr("stroke-dasharray", "5,3")
-      .attr("fill", "none");
-  hl.enter().append("text")
-      .attr('x', x(data)+5)
-      .attr('y', 16)
-      .attr('text-anchor', 'top')
-      .attr('alignment-baseline', 'top')
-      .attr("fill", colorSwatches.highlight)
-      .text(label)
-
-  hl.exit().remove()
-}
 
 function arrayQuartiles (sortedArr) {
   return [
@@ -696,4 +678,3 @@ function setSidePanelHeight(){
   $('.panel-body.side.flex-grow').height(contentHeight - 10);
 }
 setTimeout(setSidePanelHeight, 1000)
-

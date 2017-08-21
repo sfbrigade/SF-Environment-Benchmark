@@ -36,18 +36,13 @@ body {
 .nav-pills>li {
 	background-color: #FBFCFA;
 	width: 100%;
-	font-size: 12px;
+	font-size: 14px;
 	text-align: center;
 	line-height: 15px;
 	letter-spacing: 1px;
 }
 
-@media screen and (max-width: 968px) {
-	.nav-pills>li {
-		width: 100%%;
-		font-size: 12px;
-	}
-}
+
 .fa.fa-building {
 	padding-right: 3%;
 	font-size: 25px;
@@ -95,7 +90,7 @@ body {
     height: 100vh;
 }
 .building-name.side {
-	font-size: 20px;
+	font-size: 24px;
 	font-weight: 500;
 	color: #0B0B0B;
 	letter-spacing: 1px;
@@ -128,61 +123,33 @@ body {
 	border-radius: 2px;
 	background-color: #FFFFFF;
 }
-}
-.dashboard-header {
-	color: gray;
-	font-size: 16px;
-}
-.dashboard-header.ranking {
-	color: #008163;
-}
+
+
 .chart-title {
 	padding: 6%;
-	font-size: 14px;
+	font-size: 16px;
 	color: #3D3D3D;
 	letter-spacing: 1.2px;
 }
 .ranking-text {
 	padding: 3%;
 	margin-top: 2%;
-	font-size: 16px;
+	font-size: 18px;
 	color: #3D3D3D;
 }
 .ranking-num {
-	font-size: 32px;
+	font-size: 34px;
 	color: #0B0B0B;
 }
 .ranking-units {
-	font-size: 14px;
+	font-size: 16px;
 	color: #0B0B0B;
 }
-.dashboard-num-large {
-	font-size: 56px;
-	text-align: center;
-	line-height: 33px;
-	letter-spacing: 2px;
-	color: #0C0C0C;
-}
-.dashboard-num-small {
-	font-size: 46px;
-	text-align: center;
-	line-height: 33px;
-	letter-spacing: 2px;
-	color: #0C0C0C;
-}
-.energy-ranking {
-	font-size: 16px;
-}
+
 .row.center {
 	text-align: center;
 }
-.space {
-	padding-top: 2%;
-	padding-bottom: 3%;
-}
-.narrow {
-	line-height: 1.1;
-}
+
 .row.center.large {
 	padding-top: 20%;
 }
@@ -193,8 +160,8 @@ body {
 	width: 80%;
 	box-shadow: 0 2px 4px 0 rgba(0,0,0,0.14);
 	height: 40px;
-	font-size: 14px;
-	line-height: 20px;
+	font-size: 16px;
+	line-height: 22px;
 	letter-spacing: 1px;
 	color: white;
 }
@@ -203,12 +170,12 @@ body {
 	background-color: #c45f00;
 }
 .address {
-	font-size: 14px;
+	font-size: 16px;
 	color: #535557;
 	line-height: 20px;
 }
 .side-panel-text {
-	font-size: 14px;
+	font-size: 16px;
 	color: #535557;
 	padding-top: 10%;
 	padding-bottom: 10%;
@@ -216,18 +183,15 @@ body {
 	line-height: 24px;
 	text-align: center;
 }
-}
-.building-units, .building-data {
-	font-size: 12px;
-	line-height: 20px;
-	padding-top: 8%;
-}
+
 
 .building-units {
+	font-size: 16px;
 	text-align: right;
 	color: #535557;
 }
 .building-data {
+	font-size: 16px;
 	padding-right: 8%;
 	padding-left: 8%;
 	text-align: left;
@@ -255,7 +219,7 @@ h4 {
 .profile-header {
 	color: #1D8064;
 	padding-bottom: 5%;
-	font-size: 11px;
+	font-size: 14px;
 }
 .nav {
 	padding-left: 1px;
@@ -267,7 +231,7 @@ h4 {
 
 .link a {
 	padding-top: 2%;
-	font-size: 12px;
+	font-size: 16px;
 	letter-spacing: 1px;
 	text-decoration: underline;
 }
@@ -339,7 +303,7 @@ h4 {
 
 .axis text {
     font-family: sans-serif;
-    font-size: 0.8em;
+    font-size: 12px;
 }
 
 .rLegend circle {
@@ -354,6 +318,6 @@ h4 {
 }
 
 .axislabel {
-	font-size: 0.8em;
+	font-size: 12px;
 	fill: #777;
 }

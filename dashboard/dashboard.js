@@ -487,13 +487,14 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
 
 
   if (singleBuildingData.localRank) {
-    d3.selectAll('.building-ranking').text(singleBuildingData.localRank[0])
-    d3.selectAll('.local-ranking-length').text(singleBuildingData.localRank[1])
+    d3.selectAll('.building-ranking-text').text(singleBuildingData.localRank[0])
+    d3.selectAll('.total-building-type').text(singleBuildingData.localRank[1])
     // rankRingChart.colorScale(color.ranking)
     // ringChartElement.datum([singleBuildingData.localRank]).call(rankRingChart)
   } else {
     // the building is not rankable: the % change in eui either increased by more than 100 or decreased by more than 80 over the previous 2 years
     d3.select('.local-ranking-container').classed('hidden', true)
+    //TODO: show an alternative text block in estar.html if not able to rank building 
   }
 
   var complianceStatusIndicator = `${singleBuildingData.latest_benchmark_year}: ${complianceStatusString(singleBuildingData.latest_benchmark)} <br>

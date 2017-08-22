@@ -70,9 +70,9 @@
 			Loading...
 		</div>
       <div id="view-content" class="row hidden">
-      	<div class="col-xs-3">
+      	<div class="col-xs-12 col-md-3">
 			<div class="row">
-	            <div class="panel-body side flex-grow">
+	            <div class="panel-body side">
                 	<div class="col-xs-12">
                 		<div class="row center">
                 			<div class="profile-header">BENCHMARKING PROFILE</div>
@@ -126,8 +126,8 @@
                 				APRIL 1, 2018
                 			</div>
             			</div>
-                		<div class="links">
-	                		<div class="row link">
+                		<div class="links hidden-xs">
+	                		<div class="row link hidden-md-down">
 	                			<a href="https://sfenvironment.org/energy/energy-efficiency/commercial-and-multifamily-properties/existing-commercial-buildings-energy-performance-ordinance">What is the Existing Commercial Buildings Ordinance?</a>
 	                		</div><br>
 	                		<div class="row link">
@@ -138,7 +138,7 @@
                 </div>
 	        </div>
 		</div>
-		<div class="col-xs-9">
+		<div class="col-xs-12 col-md-9">
 			<div class="row">
 				<div id="tabs">
 				<ul  class="nav nav-pills">
@@ -149,7 +149,7 @@
 
 				<div class="tab-pane active" id="ghg">
 					<div class="row border-bottom">
-						<div class="col-xs-3">
+						<div class="col-xs-12 col-md-3">
 							<div class="row center">
 								<img src="../assets/GHG-icon.svg" alt="GHG emissions">
 							</div>
@@ -158,14 +158,14 @@
 								<span class="ranking-units">MT CO<sub>2</sub></span>
 							</div>
 						</div>
-						<div class="col-xs-7">
+						<div class="col-xs-12 col-md-7">
 							<div class="ranking-text">
 								Building energy use by <span class="building-name">Hotel Zetta</span> resulted in <span class="building-ghg-emissions">468.5</span> tons CO<sub>2</sub> of greenhouse gas emissions in <span class="building-ghg-emissions-year">2015</span>.
 							</div>
 						</div>
 						<div class="col-xs-2"></div>
 					</div>
-					<div class="row center">
+					<div class="row center hidden-xs">
 						<div class="col-xs-2"></div>
 						<div class="col-xs-8">
 							<div class="chart-title">GREENHOUSE GAS EMISSIONS FOR <span class="building-type-upper">HOTEL</span> BUILDINGS IN SAN FRANCISCO<br><span class="building-type-sq-ft">150,000-200,000</span> SQUARE FEET</span></div>
@@ -175,7 +175,7 @@
 
 					<div class="row">
 						<div class="col-xs-12">
-							<div class="row center">
+							<div class="row center hidden-xs">
 								<div id="ghg-emissions-histogram" class="histogram-chart"></div>
 								<div id="demo" class="hidden">
 									<input type="number" id="change-ghg-input" value="100"><button id="change-ghg">change bin numbers</button>

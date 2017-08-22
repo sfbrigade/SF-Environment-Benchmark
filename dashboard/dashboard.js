@@ -29,14 +29,6 @@ var color = {
 // ref: https://github.com/socrata/soda-js
 let consumer = new soda.Consumer('data.sfgov.org')
 
-/* variables for testing */
-// let specificParcel = {parcel_s: '0267/009'}
-// let testquery = {
-//   // columns: 'property_type_self_selected, parcel_s, floor_area',
-//   where: whereArray( 'Office', [100000, 200000] ),
-//   // limit: 10
-// }
-
 let groups = {
   Office:{
     names: [
@@ -125,23 +117,18 @@ let categoryData
 let floorAreaRange
 
 
-// if(! offline){
-  var urlVars = getUrlVars();
-  if (urlVars.apn == undefined){
-      console.error("Not a valid APN")
-      //TODO: alert the user
-  } else {
-    // APN numbers look like 3721/014 and come from SF Open Data --
-    // -- see example: https://data.sfgov.org/Energy-and-Environment/Existing-Commercial-Buildings-Energy-Performance-O/j2j3-acqj
-    console.log("Trying APN: " + urlVars['apn']);
-    $('#view-welcome').addClass('hidden')
-    $('#view-load').removeClass('hidden')
-    propertyQuery( 1, {parcel_s: urlVars['apn']}, null, handleSingleBuildingResponse )
-  }
-// }else{
-//     handleSingleBuildingResponse(offline.single)
-// }
-
+var urlVars = getUrlVars();
+if (urlVars.apn == undefined){
+    console.error("Not a valid APN")
+    //TODO: alert the user
+} else {
+  // APN numbers look like 3721/014 and come from SF Open Data --
+  // -- see example: https://data.sfgov.org/Energy-and-Environment/Existing-Commercial-Buildings-Energy-Performance-O/j2j3-acqj
+  console.log("Trying APN: " + urlVars['apn']);
+  $('#view-welcome').addClass('hidden')
+  $('#view-load').removeClass('hidden')
+  propertyQuery( 1, {parcel_s: urlVars['apn']}, null, handleSingleBuildingResponse )
+}
 
 // Get URL parameters
 // see also: http://snipplr.com/view/19838
@@ -244,19 +231,14 @@ function handleSingleBuildingResponse(rows) {
 
   let type = singleBuildingData.property_type_self_selected
 
-  /* check to see if  the returned building is one of our supported building types */
+  /* check to see if the returned building is one of our supported building types */
   if (Object.keys(groups).indexOf(type) == -1) {
     console.error("not a supported building type");
     $('#view-load').html('The chosen building type is not supported by this dashboard interface')
   } else {
-    // let minMax = ts.invertExtent(ts(+singleBuildingData.floor_area))
     let minMax = groups[type].scale.invertExtent(groups[type].scale(+singleBuildingData.floor_area))
     floorAreaRange = minMax
-    // if(! offline){
-      propertyQuery( null, null, formQueryString({where: whereArray( type, minMax )}), handlePropertyTypeResponse )
-    // } else {
-    //   handlePropertyTypeResponse(offline.multiple)
-    // }
+    propertyQuery( null, null, formQueryString({where: whereArray( type, minMax )}), handlePropertyTypeResponse )
   }
 }
 
@@ -423,37 +405,6 @@ function apiDataToArray (data) {
   return arr
 }
 
-
-
-// /**
-// * digestData - reduces data from api into summary form
-// */
-// function digestData (categoryFilter) {
-//   var arr = returnedApiData
-//   if (categoryFilter && categoryFilter !== 'All') {
-//     arr = arr.filter(function(parcel){
-//       return parcel.property_type_self_selected === categoryFilter
-//     })
-//   }
-//   var result = arr.reduce(function (prev, curr) {
-//     // # of Properties
-//     // SF of floor area
-//     // Energy Like for Like 2013-2014 (418 properties)
-//     // Total GHG Emissions (MT CO2e)
-//     // Compliance Rate
-//     return {
-//       count: prev.count + 1,
-//       floor_area: prev.floor_area + +curr.floor_area,
-//       total_ghg: (isNaN(+curr.latest_total_ghg_emissions_metric_tons_co2e)) ? prev.total_ghg : prev.total_ghg + +curr.latest_total_ghg_emissions_metric_tons_co2e,
-//       compliance: (curr.latest_benchmark === 'Complied') ? prev.compliance + 1 : prev.compliance
-//     }
-//   }, {count:0,floor_area:0,total_ghg:0,compliance:0})
-//   result.compliance = roundToTenth(100*(result.compliance/result.count))
-//   result.total_ghg = roundToTenth(result.total_ghg)
-//   result.type = categoryFilter
-//   return result
-// }
-
 /**
 * populateInfoBoxes - brute force put returned data into infoboxes on the page
 * @param {object} singleBuildingData - data for a single building
@@ -494,7 +445,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   } else {
     // the building is not rankable: the % change in eui either increased by more than 100 or decreased by more than 80 over the previous 2 years
     d3.select('.local-ranking-container').classed('hidden', true)
-    //TODO: show an alternative text block in estar.html if not able to rank building 
+    //TODO: show an alternative text block in estar.html if not able to rank building
   }
 
   var complianceStatusIndicator = `${singleBuildingData.latest_benchmark_year}: ${complianceStatusString(singleBuildingData.latest_benchmark)} <br>
@@ -569,18 +520,6 @@ function onlyNumbers (val) {
 function objArrayToSortedNumArray (objArray,prop) {
   return objArray.map(function (el){ return el[prop] }).sort(function (a,b) { return a - b })
 }
-
-// function anyPropNA (obj) {
-//   var result = false
-//   for (var prop in obj) {
-//     if (obj[prop] === "N/A") result = true
-//   }
-//   return result
-// }
-
-// function sortNumber (a,b) {
-//   return a - b;
-// }
 
 function roundToTenth (num){
   return Math.round(10*num)/10

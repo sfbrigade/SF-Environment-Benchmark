@@ -1,73 +1,67 @@
-/*
-todo: implement something like this:
-https://bl.ocks.org/mbostock/3887193
-*/
 function ringChart() {
-  var margin = {top: 10, right: 10, bottom: 10, left: 10},
-      width = 500,
-      height = 500
+  var margin = {top: 10, right: 10, bottom: 10, left: 10}
+  let width = 200
+  let height = 200
 
-  var color = d3.scale.ordinal()
-      .range(["#e9a447", "#b4b4b4"]);
+  let ringHeight = 90
+  let ringWidth = 90
+  let ringThick = 8
+  let ringRadius = d3.min([ringHeight,ringWidth])/2
+  let arc = d3.svg.arc()
+      .outerRadius(ringRadius)
+      .innerRadius(ringRadius - ringThick)
+      .startAngle(0)
 
-  var arc = d3.svg.arc()
-      .outerRadius(radius - 10)
-      .innerRadius(radius - 70);
+  let color = d3.scale.ordinal()
+      .range(["#e9a447", "#b4b4b4"])
 
-  var pie = d3.layout.pie()
-      .sort(null)
-      .value(function(d) { return d.value; });
-
-  function findValueAndTotal(category, data){
-    /* expecting data to be [{value: number, category: string}] */
-    var total = data.reduce(function(acc, val) {
-      return acc + val.value;
-    }, 0)
-    var value = data.find(function(el){
-      return el.category === category
-    }).value
-    return [{value: value, category: category}, {value:total-value, category: 'the-rest'}]
-  }
 
   function chart(selection) {
     selection.each(function(data) {
-      /* data is expected to be an array of objects like: {x:num, y:num, r:num, id:str} where id is optional */
-      /* Sort the data so smaller radius dots will be drawn on top */
+      let svg = d3.select(this).selectAll("svg").data([data])
+      let gEnter = svg.enter().append("svg").append("g")
 
-      var foo = findValueAndTotal('foo1',data)
-      // Select the svg element, if it exists.
-      var svg = d3.select(this).selectAll("svg").data([pie(foo)]);
+      svg
+        .attr("width", width)
+        .attr("height", height)
 
-      // Otherwise, create the skeletal chart.
-      var gEnter = svg.enter().append("svg").append("g");
+      let g = svg.select("g")
+              .attr("transform", "translate(" +  (width / 2) + "," + (height / 2) + ")")
 
-      gEnter.append("g").attr("class", "arc")
+      let bg = g.append('path')
+        .datum({ endAngle: 2 * Math.PI })
+        .attr('fill', '#c6c6c6')
+        .attr('d', arc)
 
-      // Update the outer dimensions.
-      svg .attr("width", width)
-          .attr("height", height);
+      let fg = g.selectAll('.arc').data(data)
+      fg.enter().append('path').attr("class", "arc")
 
-      // Update the inner dimensions.
-      var g = svg.select("g")
-          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      fg
+        .attr('fill', function(d){ return color(d[0]) })
+        .datum(function(d){ return { endAngle: arcAngle(d) } })//TODO: do this using proper binding
+        .attr('d', arc)
 
+      let ranking = g.selectAll('.ranking').data(data)
+      ranking.enter().append('g').attr('class','ranking')
 
-      // // Update the dots.
-      // var dot = svg.select(".dots").selectAll(".dot").data(data);
-      // dot.enter().append("circle").attr('class', 'dot');
-      // dot.exit().transition().duration(1000).attr("r", function(d) { return 0 }).remove();
-      // dot .attr("r", function(d) { return 0; })
-      //     .attr("cx", function(d) { return x(d.x); })
-      //     .attr("cy", function(d) { return y(d.y); })
-      //     .attr('fill', function(d){ return color(d.x) } )
-      //     .attr('fill-opacity', 0.6)
-      //     // .attr('data-id', function(d) { return d.id })
-      //     .order()
-      // dot.transition().duration(1000)
-      //     .attr("r", function(d) { return r(d.r); })
-
+      ranking.append('text').attr('text-anchor', 'middle')
+          .attr('alignment-baseline', 'baseline')
+          .attr('font-size','2.5em')
+          .text(function(d){
+            return `#${d[0]}`
+          })
+      ranking.append('text').attr('text-anchor', 'middle')
+          .attr('alignment-baseline', 'hanging')
+          .text(function(d){
+            return `out of ${d[1]}`
+          })
     })
 
+  }
+
+  function arcAngle(arr){
+    let foo = arr[1]-arr[0] + 1
+    return (2*Math.PI*foo)/arr[1]
   }
 
   chart.margin = function(_) {
@@ -87,6 +81,24 @@ function ringChart() {
   chart.height = function(_) {
     if (!arguments.length) return height;
     height = _;
+    return chart;
+  };
+
+  chart.ringWidth = function(_) {
+    if (!arguments.length) return ringWidth;
+    ringWidth = _;
+    return chart;
+  };
+
+  chart.ringHeight = function(_) {
+    if (!arguments.length) return ringHeight;
+    ringHeight = _;
+    return chart;
+  };
+
+  chart.ringThick = function(_) {
+    if (!arguments.length) return ringThick;
+    ringThick = _;
     return chart;
   };
 

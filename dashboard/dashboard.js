@@ -397,7 +397,6 @@ function apiDataToArray (data) {
     // if ( typeof parcel != 'object' || parcel === 'null' ) continue
     let res = {id: parcel.ID}
     LIMITEDMETRICS.forEach(metric=>{
-      //TODO: change returned value to NaN instead of -1; currently, causes ranking algo to return erronious values when metric = "N/A"
         res[metric] = (typeof parseInt(parcel[metric]) === 'number' && !isNaN(parcel[metric])) ? parseInt(parcel[metric]) : -1
     })
     return res
@@ -446,6 +445,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
     // the building is not rankable: the % change in eui either increased by more than 100 or decreased by more than 80 over the previous 2 years
     d3.select('.local-ranking-container').classed('hidden', true)
     //TODO: show an alternative text block in estar.html if not able to rank building
+    d3.selectAll('.estar-ranking-text').text(`${singleBuildingData.building_name} could not be ranked against other ${singleBuildingData.property_type_self_selected.toLowerCase()}s using the latest benchmark data.`)
   }
 
   var complianceStatusIndicator = `${singleBuildingData.latest_benchmark_year}: ${complianceStatusString(singleBuildingData.latest_benchmark)} <br>
@@ -484,10 +484,11 @@ function rankBuildings (id, bldgArray, prop, prop2) {
   let sorted = bldgArray.sort(function(a,b){
     if( +a[prop] === +b[prop] ) {
       return +a[prop2] - +b[prop2]
-    }else {
-      return +a[prop] - +b[prop]
     }
+    return +b[prop] - +a[prop]
   })
+
+  sorted = sorted.filter(el=>{return el[prop] > 0})
 
   let rank = sorted.findIndex(function(el){return el.id === id})
   if (rank === -1) return false //indicates building not in ranking array

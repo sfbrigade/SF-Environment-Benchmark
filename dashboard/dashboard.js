@@ -442,9 +442,8 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
     // rankRingChart.colorScale(color.ranking)
     // ringChartElement.datum([singleBuildingData.localRank]).call(rankRingChart)
   } else {
-    // the building is not rankable: the % change in eui either increased by more than 100 or decreased by more than 80 over the previous 2 years
+    // the building is not rankable: did not report an estar score OR the % change in eui either increased by more than 100 or decreased by more than 80 over the previous 2 years
     d3.select('.local-ranking-container').classed('hidden', true)
-    //TODO: show an alternative text block in estar.html if not able to rank building
     d3.selectAll('.estar-ranking-text').text(`${singleBuildingData.building_name} could not be ranked against other ${singleBuildingData.property_type_self_selected.toLowerCase()}s using the latest benchmark data.`)
   }
 
@@ -462,14 +461,6 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.select('#compliance-status').html(complianceStatusIndicator)
 
   d3.select('.ranking').text('LOCAL RANKING ' + singleBuildingData.latest_benchmark_year)
-
-  //TODO: change #local-ranking-tooltip
-  // the following doesn't quite work:
-  $("#local-ranking-tooltip").attr("data-original-title",
-    "Based on score and energy use intensity, " + singleBuildingData.building_name +"'s energy use ranks #"
-    + singleBuildingData.localRank[0] +" out of " + singleBuildingData.localRank[1] + " " + singleBuildingData.property_type_self_selected.toLowerCase() +
-    " buildings sized between " + numberWithCommas(floorAreaRange[0])
-    + '-' + numberWithCommas(floorAreaRange[1]) + " square feet.")
 }
 
 /**

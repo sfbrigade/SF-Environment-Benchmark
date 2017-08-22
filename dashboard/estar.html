@@ -148,11 +148,16 @@
 		          	<div class="row border-bottom">
 		          		<div class="col-xs-12 col-md-3">
 		          			<div class="row center">
-		          				<span class="circle-chart" id="energy-star-score-radial"></span>
+		          				<div class="local-ranking-container">
+		          				<span class="local-ranking-lg">#
+		          					<span class="building-ranking"></span>
+		          				</span>
+		          				</span><br>out of <span class="local-ranking-length">100</span> buildings
+		          				<span class="center"><a data-toggle="tooltip" data-placement="right" title="The local ranking figure compares peer buildings by their ENERGY STAR Score. In cases where the rank is identical, a building's site EUI is also used. The higher a ranking, the better a building's performance.">  <i class="fa fa-info-circle" aria-hidden="true"></i></a></span></div>
 		          			</div>
 		          		</div>
 			          	<div class="col-xs-12 col-md-7">
-			          		<div class="ranking-text">
+			          		<div class="ranking-text" id="estar-text">
 			          		In <span class="building-energy-star-score-year">2015</span>, <span class="building-name">Hotel Zetta</span> earned an ENERGY STAR score of <span id="building-energy-star-score">43</span>. The national <span class="building-type-lower">hotel</span> median score is <span id="median-energy-star-score">50</span>.
 			          		</div>
 			          	</div>
@@ -205,6 +210,7 @@
 
 	<script src="../js/histogram-chart.js"></script>
 	<script src="../js/quartiles-chart.js"></script>
+	<script src="../js/ring-chart.js"></script>
 	<script src="dashboard.js"></script>
 	<script src="demo.js"></script>
 </body>

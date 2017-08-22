@@ -8,6 +8,7 @@ body {
 	padding-right: 0;
 	padding-left: 0;
 }
+/* navbar styling */
 .flex-grow {
 	display: flex;
     -webkit-flex: 2;
@@ -42,6 +43,16 @@ body {
 	letter-spacing: 1px;
 }
 
+.navbar {
+	background: linear-gradient(90deg, #1D8064 0%, #1D8064 100%);
+	-webkit-box-shadow: 0 8px 6px -6px #4d4d4d;
+    -moz-box-shadow: 0 8px 6px -6px #4d4d4d;
+    box-shadow: 0 8px 6px -6px #4d4d4d;
+    border: none;
+    height: 60px;
+	border-radius: 2px;
+	background-color: #FFFFFF;
+}
 
 .fa.fa-building {
 	padding-right: 3%;
@@ -57,6 +68,8 @@ body {
 .fa-check, .fa-times {
 	font-size: 1.5em;
 }
+
+
 #tabs .tab-content {
   color : white;
   color: black;
@@ -113,18 +126,14 @@ body {
 .container {
 	margin: 0;
 }
-.navbar {
-	background: linear-gradient(90deg, #1D8064 0%, #1D8064 100%);
-	-webkit-box-shadow: 0 8px 6px -6px #4d4d4d;
-    -moz-box-shadow: 0 8px 6px -6px #4d4d4d;
-    box-shadow: 0 8px 6px -6px #4d4d4d;
-    border: none;
-    height: 60px;
-	border-radius: 2px;
-	background-color: #FFFFFF;
+
+.dashboard-header {
+	color: gray;
+	font-size: 16px;
 }
-
-
+.dashboard-header.ranking {
+	color: #008163;
+}
 .chart-title {
 	padding: 6%;
 	font-size: 16px;
@@ -196,14 +205,6 @@ body {
 	padding-left: 8%;
 	text-align: left;
 	color: #535557;
-}
-.building-ranking {
-	color: #FFFFFF;
-	font-size: 35px;
-	letter-spacing: 1px;
-	line-height: 32px;
-	text-align: center;
-	font-weight: 200;
 }
 #local-ranking-tooltip {
 	color: #6ED9BE;
@@ -287,7 +288,17 @@ h4 {
 	padding-left: 5px;
 	color: darkgray;
 }
-
+.local-ranking-lg {
+	color: #3D3D3D;
+	font-size: 40px;
+	letter-spacing: -5px;
+}
+.local-ranking-container {
+	padding-top: 7%;
+}
+.tooltip-inner {
+	width: 300px;
+}
 /* charts */
 
 .chart-quartiles {

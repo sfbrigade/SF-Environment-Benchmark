@@ -113,10 +113,10 @@ var ghgHistogram = histogramChart()
 
 var euiChartElement = d3.select('#eui-quartileschart')
 
-let ringChartElement = d3.select('#energy-star-score-radial')
-let rankRingChart = ringChart()
-  .width(100)
-  .height(100)
+// let ringChartElement = d3.select('#energy-star-score-radial')
+// let rankRingChart = ringChart()
+//   .width(100)
+//   .height(100)
 
 
 
@@ -333,14 +333,6 @@ function handlePropertyTypeResponse(rows) {
 
   populateInfoBoxes(singleBuildingData, categoryData, floorAreaRange)
 
-  /* draw ring chart for ranking */
-  if (singleBuildingData.localRank) {
-    rankRingChart.colorScale(color.ranking)
-    ringChartElement.datum([singleBuildingData.localRank]).call(rankRingChart)
-  } else {
-    // the building is not rankable: the % change in eui either increased by more than 100 or decreased by more than 80 over the previous 2 years
-  }
-
   $('#view-load').addClass('hidden')
   $('#view-content').removeClass('hidden')
 }
@@ -425,6 +417,7 @@ function apiDataToArray (data) {
     // if ( typeof parcel != 'object' || parcel === 'null' ) continue
     let res = {id: parcel.ID}
     LIMITEDMETRICS.forEach(metric=>{
+      //TODO: change returned value to NaN instead of -1; currently, causes ranking algo to return erronious values when metric = "N/A"
         res[metric] = (typeof parseInt(parcel[metric]) === 'number' && !isNaN(parcel[metric])) ? parseInt(parcel[metric]) : -1
     })
     return res
@@ -494,8 +487,16 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   )
   d3.selectAll('.building-type-sq-ft').text(numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]))
 
-  d3.select('#building-ranking').text(singleBuildingData.localRank[0])
-  d3.select('#total-building-type').text(singleBuildingData.localRank[1])
+
+  if (singleBuildingData.localRank) {
+    d3.selectAll('.building-ranking').text(singleBuildingData.localRank[0])
+    d3.selectAll('.local-ranking-length').text(singleBuildingData.localRank[1])
+    // rankRingChart.colorScale(color.ranking)
+    // ringChartElement.datum([singleBuildingData.localRank]).call(rankRingChart)
+  } else {
+    // the building is not rankable: the % change in eui either increased by more than 100 or decreased by more than 80 over the previous 2 years
+    d3.select('.local-ranking-container').classed('hidden', true)
+  }
 
   var complianceStatusIndicator = `${singleBuildingData.latest_benchmark_year}: ${complianceStatusString(singleBuildingData.latest_benchmark)} <br>
   ${singleBuildingData.latest_benchmark_year - 1}: ${complianceStatusString(singleBuildingData.prev_year_benchmark)}`

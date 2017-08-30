@@ -154,3 +154,5 @@ function histogramChart() {
 
   return chart;
 }
+
+module.exports = histogramChart

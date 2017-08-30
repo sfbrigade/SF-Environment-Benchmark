@@ -145,3 +145,5 @@ function quartilesChart() {
 
   return chart;
 }
+
+module.exports = quartilesChart

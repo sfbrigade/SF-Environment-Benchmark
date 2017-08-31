@@ -1,16 +1,15 @@
-"use strict";
+"use strict"
 import soda from 'soda-js'
+import * as dataManipulation from './dataManipulation.js'
+import * as apiCalls from './apiCalls.js'
+import * as helpers from './helpers.js'
 import quartilesChart from '../../../js/quartiles-chart.js'
 import histogramChart from '../../../js/histogram-chart.js'
 
+
 //TODO: CHANGE limit on returned properties in function propertyTypeQuery()
-const DATASOURCE = '75rg-imyz' // 'j2j3-acqj'
-const METRICS = ['benchmark','energy_star_score','site_eui_kbtu_ft2','source_eui_kbtu_ft2','percent_better_than_national_median_site_eui','percent_better_than_national_median_source_eui','total_ghg_emissions_metric_tons_co2e','total_ghg_emissions_intensity_kgco2e_ft2','weather_normalized_site_eui_kbtu_ft2','weather_normalized_source_eui_kbtu_ft2']
-const LIMITEDMETRICS = ['latest_energy_star_score', 'latest_total_ghg_emissions_metric_tons_co2e', 'latest_site_eui_kbtu_ft2']
-const RANKINGMETRIC = 'latest_energy_star_score'
-const RANKINGMETRICTIEBREAK ='latest_site_eui_kbtu_ft2'
-const BLK = /(.+)\//
-const LOT = /[\/\.](.+)/
+
+
 
 /* glogal reference objects */
 /* colorSwatches should be shared between map.js & dashboard.js */
@@ -81,10 +80,10 @@ for (let category in groups){
 }
 
 /* example queries */
-// console.log( formQueryString(testquery) )
-// propertyQuery( 1, specificParcel, null, handleSingleBuildingResponse )
-// propertyQuery( null, null, formQueryString(testquery), handlePropertyTypeResponse )
-// propertyQuery( null, {property_type_self_selected:'Office'}, null, handlePropertyTypeResponse )
+// console.log( apiCalls.formQueryString(testquery) )
+// apiCalls.propertyQuery( consumer, 1, specificParcel, null, handleSingleBuildingResponse )
+// apiCalls.propertyQuery( consumer, null, null, apiCalls.formQueryString(testquery), handlePropertyTypeResponse )
+// apiCalls.propertyQuery( consumer, null, {property_type_self_selected:'Office'}, null, handlePropertyTypeResponse )
 
 
 /* page elements */
@@ -120,7 +119,7 @@ let categoryData
 let floorAreaRange
 
 
-var urlVars = getUrlVars();
+var urlVars = helpers.getUrlVars();
 if (urlVars.apn == undefined){
     console.error("Not a valid APN")
     //TODO: alert the user
@@ -130,97 +129,9 @@ if (urlVars.apn == undefined){
   console.log("Trying APN: " + urlVars['apn']);
   $('#view-welcome').addClass('hidden')
   $('#view-load').removeClass('hidden')
-  propertyQuery( 1, {parcel_s: urlVars['apn']}, null, handleSingleBuildingResponse )
+  apiCalls.propertyQuery(consumer, 1, {parcel_s: urlVars['apn']}, null, handleSingleBuildingResponse )
 }
 
-// Get URL parameters
-// see also: http://snipplr.com/view/19838
-// Usage: `map = getUrlVars()` while at example.html?foo=asdf&bar=jkls
-// sets map['foo']='asdf' and map['bar']='jkls'
-function getUrlVars() {
-  var vars = {};
-  window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,
-    function(m,key,value) {
-      vars[key] = value;
-    });
-  return vars;
-}
-
-
-
-/**
-* whereArray - form the 'where array' that goes into formQueryString
-* @param {string} propertyType - property_type_self_selected
-* @param {array} range - [min,max] of floor_area
-* @return {array} the 'where array'
-*/
-function whereArray(propertyType, range){
-  if (range[0] == undefined) {range[0] = 10000}
-  let res = [
-    "property_type_self_selected='" + propertyType + "'",
-    'floor_area > ' + range[0]
-  ]
-  if (range[1]) {
-    res.push('floor_area < ' + range[1])
-  }
-  return res
-}
-
-/**
-* formQueryString - form a SOQL query string
-* for multi-condition WHERE, otherwise use soda-js Consumer
-* see https://dev.socrata.com/docs/queries/query.html
-* @param {object} params - query params, limited in implementation
-* @return {string} the query string
-*/
-function formQueryString(params){
-  let query = 'SELECT '
-
-  if (params.columns){
-    // params.columns is a string of comma separated column headings
-    query += params.columns + ' '
-  } else {
-    query += '* '
-  }
-
-  if (params.where){
-    // params.where is an array of conditions written out as strings
-    query += 'WHERE ' + params.where[0] + ' '
-    let i = 1, len = params.where.length
-    if (len > 1){
-      for (; i<len; i++) {
-        query += 'AND ' + params.where[i] + ' '
-      }
-    }
-  }
-
-  if (params.limit){
-    //params.limit is an integer
-    query += 'LIMIT ' + params.limit
-  }
-
-  return query
-}
-
-/**
-* propertyQuery - query sfdata for a parcel or parcels
-* @param {number} limit - how many entries to return
-* @param {object} whereparams - query params, generally of the form {parcel_s: "####/###"} or {property_type_self_selected: "Office"}
-* @param {string} soqlQuery - complete SOQL query string.  it seems this will override parameters in 'limit' and 'whereparams' if not null
-* @param {function} handler - callback handler function for returned json
-* @return some sort of promise
-*/
-function propertyQuery(limit, whereparams, soqlQuery, handler) {
-  consumer.query()
-    .withDataset(DATASOURCE)
-    .limit(limit)
-    .where(whereparams)
-    .soql(soqlQuery)
-    .getRows()
-      // this might be starting down the road to callback hell
-      .on('success', handler)
-      .on('error', function(error) { console.error(error); });
-}
 
 /**
 * handleSingleBuildingResponse - do something with the returned data, expects only one row
@@ -230,7 +141,7 @@ function handleSingleBuildingResponse(rows) {
   if (typeof rows[0] == 'undefined') {
     return $('#view-load').html('The record for the chosen building was not found')
   }
-  singleBuildingData = parseSingleRecord(rows[0]) //save data in global var
+  singleBuildingData = dataManipulation.parseSingleRecord(rows[0]) //save data in global var
 
   let type = singleBuildingData.property_type_self_selected
 
@@ -241,7 +152,7 @@ function handleSingleBuildingResponse(rows) {
   } else {
     let minMax = groups[type].scale.invertExtent(groups[type].scale(+singleBuildingData.floor_area))
     floorAreaRange = minMax
-    propertyQuery( null, null, formQueryString({where: whereArray( type, minMax )}), handlePropertyTypeResponse )
+    apiCalls.propertyQuery(consumer, null, null, apiCalls.formQueryString({where: apiCalls.whereArray( type, minMax )}), handlePropertyTypeResponse )
   }
 }
 
@@ -250,21 +161,21 @@ function handleSingleBuildingResponse(rows) {
 * @param {array} rows - returned from consumer.query.getRows
 */
 function handlePropertyTypeResponse(rows) {
-  //TODO: parseSingleRecord finds the "latest" value for each metric, so the comparisons between buildings are not necessarially within the same year.  perhaps parseSingleRecord should accept a param for year, passing to "latest" which finds that particular year instead of the "latest" metric. OR the propertyQuery call inside handleSingleBuildingResponse should take a param for year that only requests records which are not null for the individual building's "latest" metric year
-  categoryData = rows.map(parseSingleRecord)    // save data in global var
-  categoryData = cleanData(categoryData)        // clean data according to SFENV's criteria
-  categoryData = apiDataToArray( categoryData ) // filter out unwanted data
+  //TODO: dataManipulation.parseSingleRecord finds the "latest" value for each metric, so the comparisons between buildings are not necessarially within the same year.  perhaps dataManipulation.parseSingleRecord should accept a param for year, passing to "latest" which finds that particular year instead of the "latest" metric. OR the apiCalls.propertyQuery call inside handleSingleBuildingResponse should take a param for year that only requests records which are not null for the individual building's "latest" metric year
+  categoryData = rows.map(dataManipulation.parseSingleRecord)    // save data in global var
+  categoryData = dataManipulation.cleanData(categoryData)        // clean data according to SFENV's criteria
+  categoryData = dataManipulation.apiDataToArray( categoryData ) // filter out unwanted data
 
-  let estarVals = objArrayToSortedNumArray(categoryData, 'latest_energy_star_score')
+  let estarVals = helpers.objArrayToSortedNumArray(categoryData, 'latest_energy_star_score')
   estarVals = estarVals.filter(function (d) { return d > 0 })
 
-  let ghgVals = objArrayToSortedNumArray(categoryData, 'latest_total_ghg_emissions_metric_tons_co2e')
+  let ghgVals = helpers.objArrayToSortedNumArray(categoryData, 'latest_total_ghg_emissions_metric_tons_co2e')
   ghgVals = ghgVals.filter(function (d) { return d > 0 })
 
-  let euiVals = objArrayToSortedNumArray(categoryData,'latest_site_eui_kbtu_ft2')
+  let euiVals = helpers.objArrayToSortedNumArray(categoryData,'latest_site_eui_kbtu_ft2')
   euiVals = euiVals.filter(function (d) { return d > 1 && d < 1000 })
 
-  singleBuildingData.localRank = rankBuildings(singleBuildingData.ID, categoryData, RANKINGMETRIC, RANKINGMETRICTIEBREAK)
+  singleBuildingData.localRank = dataManipulation.rankBuildings(singleBuildingData.ID, categoryData)
 
   /* set color domains */
   var estarQuartiles = arrayQuartiles(estarVals)
@@ -320,92 +231,7 @@ function handlePropertyTypeResponse(rows) {
   $('#view-content').removeClass('hidden')
 }
 
-/**
-* parseSingleRecord - parse the returned property record object
-* @param {object} record - the record object returned from SODA
-* @return {object} the record from @param with our "latest_" properties added
-*/
-function parseSingleRecord(record){
-  if (record.parcel_s === undefined) {return null}
-  if (! record.hasOwnProperty('property_type_self_selected') ) { record.property_type_self_selected = 'N/A'}
-  record.parcel1 = BLK.exec(record.parcel_s)[1]
-  record.parcel2 = LOT.exec(record.parcel_s)[1]
-  record.blklot = '' + record.parcel1 + record.parcel2
-  record.ID = '' + record.blklot
-  METRICS.forEach(function (metric) {
-    record = latest(metric, record)
-  })
-  return record
-}
 
-/**
-* latest - loop through a single parcel to find the latest data
-* @param {string} metric - the parcel metric being recorded
-* @param {object} entry - the parcel record object
-* @return {object} - the entry param with new "latest_" properties
-*/
-function latest (metric, entry) {
-  var thisYear = new Date().getFullYear()
-  var years = []
-  for (let i = 2011; i < thisYear; i++) {
-    years.push(i)
-  }
-  if (metric === 'benchmark') years.unshift(2010)
-  var yearTest = years.map(function(d){
-    if (metric === 'benchmark') return 'benchmark_' + d + '_status'
-    else return '_' + d + '_' + metric
-  })
-  yearTest.forEach(function(year,i){
-    if (entry[year] != null){
-      entry['latest_'+metric] = entry[year]
-      entry['latest_'+metric+'_year'] = years[i]
-    }
-    else {
-      entry['latest_'+metric] = entry['latest_'+metric] || 'N/A'
-      entry['latest_'+metric+'_year'] = entry['latest_'+metric+'_year'] || 'N/A'
-    }
-    if ( !isNaN(+entry['latest_'+metric]) ) {
-      entry['latest_'+metric] = roundToTenth(+entry['latest_'+metric])
-    }
-  })
-  if (metric !== 'benchmark') {
-    entry['pct_change_one_year_'+metric] = calcPctChange(entry, metric, 1)
-    entry['pct_change_two_year_'+metric] = calcPctChange(entry, metric, 2)
-  }
-  if (metric === 'benchmark') {
-    var prevYear = 'benchmark_' + (entry.latest_benchmark_year - 1) + '_status'
-    entry['prev_year_benchmark'] = entry[prevYear]
-  }
-  return entry
-}
-
-function calcPctChange(entry, metric, yearsBack){
-  let prev = getPrevYearMetric(entry, metric, yearsBack)
-  let pctChange = (+entry['latest_'+metric] - prev)/prev
-  return pctChange * 100
-}
-function getPrevYearMetric(entry, metric, yearsBack){
-  let targetYear = entry['latest_'+metric+'_year'] - yearsBack
-  let key = (metric === 'benchmark') ? `benchmark_${targetYear}_status` : `_${targetYear}_${metric}`
-  return +entry[key]
-}
-
-/**
-* apiDataToArray - transform record array to get a simpler, standardized array of k-v pairs
-* @param {array} data - the input array of data records
-* @return {array} an array of objects only LIMITEDMETRICS keys
-*/
-function apiDataToArray (data) {
-  let arr = data.map((parcel)=>{
-    // if ( typeof parcel != 'object' || parcel === 'null' ) continue
-    let res = {id: parcel.ID}
-    LIMITEDMETRICS.forEach(metric=>{
-        res[metric] = (typeof parseInt(parcel[metric]) === 'number' && !isNaN(parcel[metric])) ? parseInt(parcel[metric]) : -1
-    })
-    return res
-  })
-  return arr
-}
 
 /**
 * populateInfoBoxes - brute force put returned data into infoboxes on the page
@@ -428,7 +254,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.selectAll('.building-type-lower').text(singleBuildingData.property_type_self_selected.toLowerCase())
   d3.selectAll('.building-type-upper').text(singleBuildingData.property_type_self_selected.toUpperCase())
 
-  d3.select('#building-floor-area').text(numberWithCommas(singleBuildingData.floor_area))
+  d3.select('#building-floor-area').text(helpers.numberWithCommas(singleBuildingData.floor_area))
   d3.selectAll('.building-name').text(singleBuildingData.building_name)
   d3.select('#building-street-address').text(singleBuildingData.building_address)
   d3.select('#building-city-address').text(
@@ -436,7 +262,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
     singleBuildingData.full_address_state + ', ' +
     singleBuildingData.full_address_zip + ' '
   )
-  d3.selectAll('.building-type-sq-ft').text(numberWithCommas(floorAreaRange[0]) + '-' + numberWithCommas(floorAreaRange[1]))
+  d3.selectAll('.building-type-sq-ft').text(helpers.numberWithCommas(floorAreaRange[0]) + '-' + helpers.numberWithCommas(floorAreaRange[1]))
 
 
   if (singleBuildingData.localRank) {
@@ -466,66 +292,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
   d3.select('.ranking').text('LOCAL RANKING ' + singleBuildingData.latest_benchmark_year)
 }
 
-/**
-* rankBuildings - ranking algorithim, dumb sort for now
-* @param {string} id - building "ID" number
-* @param {array} bldgArray - processed/simplified building data
-* @param {string} prop - the property to rank by
-* @param {string} prop2 - the property to rank by if a[prop] === b[prop]
-* @return {array} [rank, count]
-*/
-function rankBuildings (id, bldgArray, prop, prop2) {
-  let sorted = bldgArray.sort(function(a,b){
-    if( +a[prop] === +b[prop] ) {
-      return +a[prop2] - +b[prop2]
-    }
-    return +b[prop] - +a[prop]
-  })
 
-  sorted = sorted.filter(el=>{return el[prop] > 0})
-
-  let rank = sorted.findIndex(function(el){return el.id === id})
-  if (rank === -1) return false //indicates building not in ranking array
-  rank += 1
-  let count = sorted.length
-
-  return [rank, count]
-}
-
-/**
-* cleanData - remove property listings that don't meet criteria provided by SF Dept of Env
-* @param {array} inputData - data from socrata
-* @return {array} - % change eui has not increased by more than 100 nor decreased by 80 over the previous 2 years
-*/
-function cleanData (inputData) {
-  var filtered = inputData.filter(function(el){
-    var cond1 = (el.pct_change_one_year_site_eui_kbtu_ft2 <= 100) && (el.pct_change_one_year_site_eui_kbtu_ft2 >= -80)
-    var cond2 = (el.pct_change_two_year_site_eui_kbtu_ft2 <= 100) && (el.pct_change_two_year_site_eui_kbtu_ft2 >= -80)
-    var cond3 = el[RANKINGMETRIC] !== undefined
-    return (cond1 && cond2 & cond3)
-  })
-  return filtered
-}
-
-/****** helper functions *******/
-function onlyNumbers (val) {
-  return (typeof parseInt(val) === 'number' && !isNaN(val)) ? parseInt(val) : -1
-}
-
-function objArrayToSortedNumArray (objArray,prop) {
-  return objArray.map(function (el){ return el[prop] }).sort(function (a,b) { return a - b })
-}
-
-function roundToTenth (num){
-  return Math.round(10*num)/10
-}
-
-function numberWithCommas(x) {
-    if (typeof x === 'undefined') return "and above"
-    var parts = x.toString().split(".");
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return parts.join(".");
-}
 
 /**
 * addHighlightLine - add a highlight bar to a histogram chart

@@ -4,7 +4,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
   entry: {
-    dashboard: './src/js/dashboard.js'
+    estar: './src/estar.js'
     // app: './src/index.js'
   },
   output: {

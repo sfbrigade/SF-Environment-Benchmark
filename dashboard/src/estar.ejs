@@ -1,108 +1,24 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width">
-	<title>Dashboard</title>
-	<!-- jQuery	 -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" type="text/javascript"></script>
-	<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js" type="text/javascript"></script>
-
-	<!-- bootstrap -->
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-	<!-- font awesome -->
-	<link rel= "stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
-	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
-
-	<!-- d3  -->
-	<script src="http://d3js.org/d3.v3.min.js" type="text/javascript"></script>
-	<script src="https://d3js.org/d3-queue.v2.min.js" type="text/javascript"></script>
- <%= require('./css/dashboard.css') %>
-	<!-- <link rel="stylesheet" href="css/dashboard.css"> -->
-</head>
+<%= require('html-loader!./partials/head.ejs') %>
 <body>
   <div class="container-fluid">
     <div class="row">
       <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container">
           <div class="navbar-header">
-            <a class="navbar-brand" href="">aa3ce2d6d4086352bf708b6063fd6ac3.png </a>
+            <a class="navbar-brand" href=""><% import logo from './assets/sf_logo_white.png'; require('file-loader!./assets/sf_logo_white.png') %> </a>
           </div>
         </div>
       </nav>
     </div>
     <!-- nav -->
-    <div id="view-welcome" style="margin-top: 1em;">
-  <p>This dashboard is a project of the <a href="http://datascience.codeforsanfrancisco.org">Data Science Working Group</a> at Code for San Francisco.</p>
-  <p>The intent is help building property managers understand the energy usage in compliance with the <a href="https://sfenvironment.org/energy/energy-efficiency/commercial-and-multifamily-properties/existing-commercial-buildings-energy-performance-ordinance">Existing Commercial Buildings Ordinance</a>.</p>
-  <p>To see an example of a specific property, <a href="estar.html?apn=3705/039">click here</a>.</p>
-</div>
+    <%= require('html-loader!./partials/welcome.ejs') %>
     <div id="view-load" class="hidden" style="margin-top: 1em;">
       Loading...
     </div>
     <div id="view-content" class="row hidden">
-      <div class="col-xs-12 col-md-3">
-  <div class="row">
-      <div class="panel-body side">
-          <div class="col-xs-12">
-            <div class="row center">
-              <div class="profile-header">BENCHMARKING PROFILE</div>
-            </div>
-            <div class="row center">
-              <i class="fa fa-building" aria-hidden="true"></i>
-              <span class="building-name side">Hotel Zetta</span>
-            </div>
-            <div class="row center address">
-              <span class="address" id="building-street-address">55 5th St</span><br>
-              <span class="address" id="building-city-address">San Francisco, CA 94103</span>
-            </div><br>
-            <div class="row center">
-              <div class="col-xs-6 building-units">
-                <div class="row">
-                Building type:
-                </div>
-                <div class="row">
-                Floor area:
-                </div>
-                <div class="row">
-                Compliance status:
-                </div>
-              </div>
-              <div class="col-xs-5 building-data">
-                <div class="row building-type-lower">
-            Hotel
-                </div>
-                <div class="row">
-                <span id="building-floor-area">105,905</span> ft<sup>2</sup>
-                </div>
-                <div class="row">
-                <span id="compliance-status"></span>
-                </div>
-              </div>
-            </div><br>
-            <div class="row center">
-              <a href="https://sfenvironment.org/article/how-to-comply-with-benchmarking-in-san-francisco" class="btn btn-primary btn-round-lg btn-lg">BENCHMARK NOW</a>
-            </div>
-            <div class="row center">
-              <div class="side-panel-text">
-                2017 BENCHMARKS ARE DUE
-                APRIL 1, 2018
-              </div>
-          </div>
-            <div class="links hidden-xs">
-              <div class="row link">
-                <a href="https://sfenvironment.org/energy/energy-efficiency/commercial-and-multifamily-properties/existing-commercial-buildings-energy-performance-ordinance">What is the Existing Commercial Buildings Ordinance?</a>
-              </div><br>
-              <div class="row link">
-                <a href="https://sfenvironment.org/sites/default/files/fliers/files/sfe_gb_ecb_benchmark_instructions.pdf">How to submit benchmarking data</a>
-              </div>
-            </div>
-          </div>
-        </div>
-  </div>
-</div>
+      <%= require('html-loader!./partials/sidebar.ejs') %>
       <div class="col-xs-12 col-md-9">
         <div class="row">
           <div id="tabs">
@@ -178,6 +94,6 @@
     });
   </script>
   <script src="demo.js"></script>
-<script type="text/javascript" src="dashboard.bundle.js"></script></body>
+</body>
 
 </html>

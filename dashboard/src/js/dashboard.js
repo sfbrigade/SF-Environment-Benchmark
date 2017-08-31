@@ -1,7 +1,7 @@
 "use strict";
 import soda from 'soda-js'
-import quartilesChart from '../../js/quartiles-chart.js'
-import histogramChart from '../../js/histogram-chart.js'
+import quartilesChart from '../../../js/quartiles-chart.js'
+import histogramChart from '../../../js/histogram-chart.js'
 
 //TODO: CHANGE limit on returned properties in function propertyTypeQuery()
 const DATASOURCE = '75rg-imyz' // 'j2j3-acqj'

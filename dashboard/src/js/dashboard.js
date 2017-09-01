@@ -134,7 +134,15 @@ function handleSingleBuildingResponse(rows) {
   }
 }
 
-
+/**
+*
+*/
+Dashboard.cleanAndFilter = function (rows) {
+  //TODO: dataManipulation.parseSingleRecord finds the "latest" value for each metric, so the comparisons between buildings are not necessarially within the same year.  perhaps dataManipulation.parseSingleRecord should accept a param for year, passing to "latest" which finds that particular year instead of the "latest" metric. OR the apiCalls.propertyQuery call inside handleSingleBuildingResponse should take a param for year that only requests records which are not null for the individual building's "latest" metric year
+  Dashboard.categoryData = rows.map(dataManipulation.parseSingleRecord)    // save data in global var
+  Dashboard.categoryData = dataManipulation.cleanData(Dashboard.categoryData)        // clean data according to SFENV's criteria
+  Dashboard.categoryData = dataManipulation.apiDataToArray( Dashboard.categoryData ) // filter out unwanted data
+}
 
 
 /**

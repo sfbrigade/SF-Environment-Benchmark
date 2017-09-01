@@ -1,6 +1,5 @@
 import histogramChart from '../../js/histogram-chart.js'
-import * as dataManipulation from './js/dataManipulation.js'
-import * as helpers from './js/helpers.js'
+import {arrayQuartiles, objArrayToSortedNumArray} from './js/helpers.js'
 import {Dashboard} from './js/dashboard.js'
 
 import './css/dashboard.css'
@@ -24,16 +23,12 @@ Dashboard.displayPage = 'ghg'
 * @param {array} rows - returned from consumer.query.getRows
 */
 Dashboard.handlePropertyTypeResponse = function (rows) {
-  //TODO: dataManipulation.parseSingleRecord finds the "latest" value for each metric, so the comparisons between buildings are not necessarially within the same year.  perhaps dataManipulation.parseSingleRecord should accept a param for year, passing to "latest" which finds that particular year instead of the "latest" metric. OR the apiCalls.propertyQuery call inside handleSingleBuildingResponse should take a param for year that only requests records which are not null for the individual building's "latest" metric year
-  Dashboard.categoryData = rows.map( dataManipulation.parseSingleRecord )    // save data in global var
-  Dashboard.categoryData = dataManipulation.cleanData( Dashboard.categoryData )        // clean data according to SFENV's criteria
-  Dashboard.categoryData = dataManipulation.apiDataToArray( Dashboard.categoryData ) // filter out unwanted data
+  Dashboard.cleanAndFilter(rows)
 
-
-  let ghgVals = helpers.objArrayToSortedNumArray( Dashboard.categoryData, 'latest_total_ghg_emissions_metric_tons_co2e')
+  let ghgVals = objArrayToSortedNumArray( Dashboard.categoryData, 'latest_total_ghg_emissions_metric_tons_co2e')
   ghgVals = ghgVals.filter(function (d) { return d > 0 })
 
-  Dashboard.color.total_ghg_emissions_intensity_kgco2e_ft2.domain(helpers.arrayQuartiles(ghgVals))
+  Dashboard.color.total_ghg_emissions_intensity_kgco2e_ft2.domain(arrayQuartiles(ghgVals))
 
   /* draw histogram for ghg */
   ghgHistogram

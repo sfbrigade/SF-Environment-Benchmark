@@ -4,8 +4,9 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
   entry: {
-    estar: './src/estar.js'
-    // app: './src/index.js'
+    estar: './src/estar.js',
+    eui: './src/eui.js',
+    ghg: './src/ghg.js'
   },
   output: {
     filename: '[name].bundle.js',
@@ -20,7 +21,22 @@ module.exports = {
       // inject: false,
       foo: "asdf",
       filename: 'estar.html',
-      template: 'src/estar.ejs'
+      template: 'src/estar.ejs',
+      chunks: ['estar']
+    }),
+    new HtmlWebpackPlugin({
+      // inject: false,
+      foo: "asdf",
+      filename: 'eui.html',
+      template: 'src/eui.ejs',
+      chunks: ['eui']
+    }),
+    new HtmlWebpackPlugin({
+      // inject: false,
+      foo: "asdf",
+      filename: 'ghg.html',
+      template: 'src/ghg.ejs',
+      chunks: ['ghg']
     })
   ],
   module: {

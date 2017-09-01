@@ -28,4 +28,11 @@ function numberWithCommas(x){
     return parts.join(".");
 }
 
-export { getUrlVars, objArrayToSortedNumArray, numberWithCommas }
+function arrayQuartiles (sortedArr) {
+  return [
+    d3.quantile(sortedArr,0.25),
+    d3.quantile(sortedArr,0.5),
+    d3.quantile(sortedArr,0.75)
+  ]
+}
+export { getUrlVars, objArrayToSortedNumArray, numberWithCommas, arrayQuartiles }

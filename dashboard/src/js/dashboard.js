@@ -3,8 +3,6 @@ import soda from 'soda-js'
 import * as dataManipulation from './dataManipulation.js'
 import * as apiCalls from './apiCalls.js'
 import * as helpers from './helpers.js'
-import histogramChart from '../../../js/histogram-chart.js'
-// import quartilesChart from '../../../js/quartiles-chart.js'
 
 let Dashboard = {};
 
@@ -85,25 +83,6 @@ for (let category in Dashboard.groups){
 // apiCalls.propertyQuery( Dashboard.consumer, null, {property_type_self_selected:'Office'}, null, handlePropertyTypeResponse )
 
 
-/* page elements */
-var estarHistogramElement = d3.select('#energy-star-score-histogram')
-var estarWidth = 500 //parseInt(estarHistogramElement.style('width'))
-var estarHistogram = histogramChart()
-  .width(estarWidth)
-  .height(200)
-  .range([0,110])
-  .tickFormat(d3.format(',d'))
-//
-// var ghgHistogramElement = d3.select('#ghg-emissions-histogram')
-// var ghgWidth = 500 //parseInt(ghgHistogramElement.style('width'))
-// var ghgHistogram = histogramChart()
-//   .width(ghgWidth)
-//   .height(200)
-//   .range([0,1650])
-//   .tickFormat(d3.format(',d'))
-//
-// var euiChartElement = d3.select('#eui-quartileschart')
-//
 // let ringChartElement = d3.select('#energy-star-score-radial')
 // let rankRingChart = ringChart()
 //   .width(100)
@@ -112,10 +91,10 @@ var estarHistogram = histogramChart()
 
 
 
-/* query machine go! */
-let singleBuildingData
-let categoryData
-let floorAreaRange
+
+Dashboard.singleBuildingData = []
+Dashboard.categoryData = []
+Dashboard.floorAreaRange = []
 
 Dashboard.startQuery = function (){
   var urlVars = helpers.getUrlVars();
@@ -140,96 +119,23 @@ function handleSingleBuildingResponse(rows) {
   if (typeof rows[0] == 'undefined') {
     return $('#view-load').html('The record for the chosen building was not found')
   }
-  singleBuildingData = dataManipulation.parseSingleRecord(rows[0]) //save data in global var
+  Dashboard.singleBuildingData = dataManipulation.parseSingleRecord(rows[0]) //save data in global var
 
-  let type = singleBuildingData.property_type_self_selected
+  let type = Dashboard.singleBuildingData.property_type_self_selected
 
   /* check to see if the returned building is one of our supported building types */
   if (Object.keys(Dashboard.groups).indexOf(type) == -1) {
     console.error("not a supported building type");
     $('#view-load').html('The chosen building type is not supported by this dashboard interface')
   } else {
-    let minMax = Dashboard.groups[type].scale.invertExtent(Dashboard.groups[type].scale(+singleBuildingData.floor_area))
-    floorAreaRange = minMax
-    apiCalls.propertyQuery(Dashboard.consumer, null, null, apiCalls.formQueryString({where: apiCalls.whereArray( type, minMax )}), handlePropertyTypeResponse )
+    let minMax = Dashboard.groups[type].scale.invertExtent(Dashboard.groups[type].scale(+Dashboard.singleBuildingData.floor_area))
+    Dashboard.floorAreaRange = minMax
+    apiCalls.propertyQuery(Dashboard.consumer, null, null, apiCalls.formQueryString({where: apiCalls.whereArray( type, minMax )}), Dashboard.handlePropertyTypeResponse )
   }
 }
 
 
-/**
-* handlePropertyTypeResponse - do something with the returned data
-* @param {array} rows - returned from consumer.query.getRows
-*/
-function handlePropertyTypeResponse(rows) {
-  //TODO: dataManipulation.parseSingleRecord finds the "latest" value for each metric, so the comparisons between buildings are not necessarially within the same year.  perhaps dataManipulation.parseSingleRecord should accept a param for year, passing to "latest" which finds that particular year instead of the "latest" metric. OR the apiCalls.propertyQuery call inside handleSingleBuildingResponse should take a param for year that only requests records which are not null for the individual building's "latest" metric year
-  categoryData = rows.map(dataManipulation.parseSingleRecord)    // save data in global var
-  categoryData = dataManipulation.cleanData(categoryData)        // clean data according to SFENV's criteria
-  categoryData = dataManipulation.apiDataToArray( categoryData ) // filter out unwanted data
 
-
-  if (Dashboard.displayPage === 'estar'){
-    let estarVals = helpers.objArrayToSortedNumArray(categoryData, 'latest_energy_star_score')
-    estarVals = estarVals.filter(function (d) { return d > 0 })
-
-    let euiVals = helpers.objArrayToSortedNumArray(categoryData,'latest_site_eui_kbtu_ft2')
-    euiVals = euiVals.filter(function (d) { return d > 1 && d < 1000 })
-
-    singleBuildingData.localRank = dataManipulation.rankBuildings(singleBuildingData.ID, categoryData)
-    var estarQuartiles = arrayQuartiles(estarVals)
-
-    Dashboard.color.energy_star_score.domain(estarQuartiles)
-    Dashboard.color.ranking.domain([ 0.25*singleBuildingData.localRank[1], 0.5*singleBuildingData.localRank[1], 0.75*singleBuildingData.localRank[1] ])
-
-    /* draw histogram for energy star */
-    estarHistogram
-      .colorScale(Dashboard.color.energy_star_score)
-      .bins(20)
-      .xAxisLabel('Energy Star Score')
-      .yAxisLabel('Buildings')
-    estarHistogramElement.datum(estarVals).call(estarHistogram)
-
-    estarHistogramElement.call(addHighlightLine,singleBuildingData.latest_energy_star_score, estarHistogram,singleBuildingData.building_name)
-
-  } else if (Dashboard.displayPage === 'ghg'){
-    let ghgVals = helpers.objArrayToSortedNumArray(categoryData, 'latest_total_ghg_emissions_metric_tons_co2e')
-    ghgVals = ghgVals.filter(function (d) { return d > 0 })
-
-    Dashboard.color.total_ghg_emissions_intensity_kgco2e_ft2.domain(arrayQuartiles(ghgVals))
-
-    /* draw histogram for ghg */
-    ghgHistogram
-      .range([0,d3.max(ghgVals)])
-      .colorScale(color.total_ghg_emissions_intensity_kgco2e_ft2)
-      .bins(100)
-      .xAxisLabel('GHG Emissions (Metric Tons CO2)')
-      .yAxisLabel('Buildings')
-      // .tickFormat(d3.format("d"))
-    ghgHistogramElement.datum(ghgVals).call(ghgHistogram)
-    ghgHistogramElement.call(addHighlightLine,singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e,ghgHistogram,singleBuildingData.building_name)
-
-  } else if (Dashboard.displayPage === 'eui'){
-    let euiVals = helpers.objArrayToSortedNumArray(categoryData,'latest_site_eui_kbtu_ft2')
-    euiVals = euiVals.filter(function (d) { return d > 1 && d < 1000 })
-
-    Dashboard.color.site_eui_kbtu_ft2.domain(arrayQuartiles(euiVals))
-    /* draw stacked bar for energy use intensity */
-    // var euiWidth = parseInt(euiChartElement.style('width'))
-    var euiWidth = 650
-    var euiChart = quartilesChart()
-      .width(euiWidth)
-      .height(150)
-      .colorScale(color.site_eui_kbtu_ft2)
-      .margin({top: 20, right: 80, bottom: 20, left: 50})
-    euiChartElement.datum(euiVals).call(euiChart)
-    euiChartElement.call(addHighlightLine, singleBuildingData.latest_site_eui_kbtu_ft2, euiChart, singleBuildingData.building_name)
-
-  }
-
-  populateInfoBoxes(singleBuildingData, categoryData, floorAreaRange)
-
-  $('#view-load').addClass('hidden')
-  $('#view-content').removeClass('hidden')
-}
 
 /**
 * populateInfoBoxes - brute force put returned data into infoboxes on the page
@@ -238,7 +144,7 @@ function handlePropertyTypeResponse(rows) {
 * @param {object} floorAreaRange - floor area range for this category
 * @return null
 */
-function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
+Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorAreaRange) {
 
   if (Dashboard.displayPage === 'estar'){
     d3.select('#building-energy-star-score').text(singleBuildingData.latest_energy_star_score)
@@ -300,7 +206,7 @@ function populateInfoBoxes (singleBuildingData,categoryData,floorAreaRange) {
 * @param {object} chart - the histogram chart object
 * @param {string} label - the label for the highlighting bar
 */
-function addHighlightLine (selection, data, chart, label) {
+Dashboard.addHighlightLine = function (selection, data, chart, label) {
   label = (label != undefined) ? `${label.toUpperCase()} - ${data}` : `${data}`
   if( isNaN(data) ) data = -100
   var x = chart.xScale(),
@@ -343,18 +249,11 @@ function addHighlightLine (selection, data, chart, label) {
 }
 
 
-function arrayQuartiles (sortedArr) {
-  return [
-    d3.quantile(sortedArr,0.25),
-    d3.quantile(sortedArr,0.5),
-    d3.quantile(sortedArr,0.75)
-  ]
-}
 
-function setSidePanelHeight(){
+
+Dashboard.setSidePanelHeight = function () {
   var contentHeight = $('#view-content').height()
   $('.panel-body.side.flex-grow').height(contentHeight - 10);
 }
-setTimeout(setSidePanelHeight, 1000)
 
 export { Dashboard }

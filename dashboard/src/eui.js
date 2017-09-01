@@ -1,4 +1,4 @@
-import histogramChart from '../../js/histogram-chart.js'
+import quartilesChart from '../../js/quartiles-chart.js'
 import * as dataManipulation from './js/dataManipulation.js'
 import * as helpers from './js/helpers.js'
 import {Dashboard} from './js/dashboard.js'
@@ -8,16 +8,9 @@ import './css/dashboard.css'
 // require('file-loader!./assets/sf_logo_white.png')
 
 /* page elements */
-var estarHistogramElement = d3.select('#energy-star-score-histogram')
-var estarWidth = 500 //parseInt(estarHistogramElement.style('width'))
-var estarHistogram = histogramChart()
-  .width(estarWidth)
-  .height(200)
-  .range([0,110])
-  .tickFormat(d3.format(',d'))
+var euiChartElement = d3.select('#eui-quartileschart')
 
-
-Dashboard.displayPage = 'estar'
+Dashboard.displayPage = 'eui'
 
 /**
 * handlePropertyTypeResponse - do something with the returned data
@@ -29,27 +22,21 @@ Dashboard.handlePropertyTypeResponse = function (rows) {
   Dashboard.categoryData = dataManipulation.cleanData(Dashboard.categoryData)        // clean data according to SFENV's criteria
   Dashboard.categoryData = dataManipulation.apiDataToArray( Dashboard.categoryData ) // filter out unwanted data
 
-  let estarVals = helpers.objArrayToSortedNumArray(Dashboard.categoryData, 'latest_energy_star_score')
-  estarVals = estarVals.filter(function (d) { return d > 0 })
 
   let euiVals = helpers.objArrayToSortedNumArray(Dashboard.categoryData,'latest_site_eui_kbtu_ft2')
   euiVals = euiVals.filter(function (d) { return d > 1 && d < 1000 })
 
-  Dashboard.singleBuildingData.localRank = dataManipulation.rankBuildings(Dashboard.singleBuildingData.ID, Dashboard.categoryData)
-  var estarQuartiles = helpers.arrayQuartiles(estarVals)
-
-  Dashboard.color.energy_star_score.domain(estarQuartiles)
-  Dashboard.color.ranking.domain([ 0.25*Dashboard.singleBuildingData.localRank[1], 0.5*Dashboard.singleBuildingData.localRank[1], 0.75*Dashboard.singleBuildingData.localRank[1] ])
-
-  /* draw histogram for energy star */
-  estarHistogram
-    .colorScale(Dashboard.color.energy_star_score)
-    .bins(20)
-    .xAxisLabel('Energy Star Score')
-    .yAxisLabel('Buildings')
-  estarHistogramElement.datum(estarVals).call(estarHistogram)
-
-  estarHistogramElement.call(Dashboard.addHighlightLine,Dashboard.singleBuildingData.latest_energy_star_score, estarHistogram,Dashboard.singleBuildingData.building_name)
+  Dashboard.color.site_eui_kbtu_ft2.domain(helpers.arrayQuartiles(euiVals))
+  /* draw stacked bar for energy use intensity */
+  // var euiWidth = parseInt(euiChartElement.style('width'))
+  var euiWidth = 650
+  var euiChart = quartilesChart()
+    .width(euiWidth)
+    .height(150)
+    .colorScale(Dashboard.color.site_eui_kbtu_ft2)
+    .margin({top: 20, right: 80, bottom: 20, left: 50})
+  euiChartElement.datum(euiVals).call(euiChart)
+  euiChartElement.call(Dashboard.addHighlightLine, Dashboard.singleBuildingData.latest_site_eui_kbtu_ft2, euiChart, Dashboard.singleBuildingData.building_name)
 
 
   Dashboard.populateInfoBoxes(Dashboard.singleBuildingData, Dashboard.categoryData, Dashboard.floorAreaRange)

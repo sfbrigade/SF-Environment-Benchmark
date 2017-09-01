@@ -4,7 +4,18 @@ import {Dashboard} from './js/dashboard.js'
 
 import './css/dashboard.css'
 
-// require('file-loader!./assets/sf_logo_white.png')
+import logo from './assets/sf_logo_white.png'
+var sfLogo = new Image()
+sfLogo.src = logo
+sfLogo.alt = "SF Dept of Environment"
+document.getElementsByClassName('navbar-brand')[0].appendChild(sfLogo)
+
+import ghg from './assets/GHG-icon.svg'
+var ghgLogo = new Image()
+ghgLogo.src = ghg
+ghgLogo.alt = "GHG emissions"
+document.getElementById('ghg-icon').appendChild(ghgLogo)
+
 
 /* page elements */
 var ghgHistogramElement = d3.select('#ghg-emissions-histogram')

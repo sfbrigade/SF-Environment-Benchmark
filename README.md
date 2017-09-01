@@ -45,15 +45,6 @@ $ git clone <your-repo>
 $ cd <this-repo's-name>
 $ git remote add upstream <this-repo>
 ```
-Install dependencies:
-```
-$ cd dashboard
-$ npm install
-```
-Use Webpack to launch a server and watch files for changes:
-```
-$ npm run start
-```
 Create a feature branch:
 ```
 $ git checkout -b <feature-branch>
@@ -72,3 +63,27 @@ $ git push
 [Create a Pull Request](https://help.github.com/articles/creating-a-pull-request/) from your pushed branch (compare branch) to this repo (base branch)   
 ...  
 Profit!
+
+### Working on the dashboard component:  
+Install dependencies:
+```
+$ cd dashboard
+dashboard$ npm install
+```
+
+Use Webpack to launch a server and watch files for changes:
+```
+dashboard$ npm run start
+```
+
+Use Webpack to watch files, but not run a server:
+```
+dashboard$ npm run watch
+```
+
+Use Webpack to bundle files for production site:
+```
+dashboard$ npm run build
+```
+Now the files in `dashboard/dist/` are all you need to copy to a production server!
+

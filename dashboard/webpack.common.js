@@ -1,6 +1,6 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 
 module.exports = {
   entry: {
@@ -12,28 +12,21 @@ module.exports = {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist')
   },
-  devtool: 'inline-source-map',
-  devServer: {
-    contentBase: './dist'
-  },
   plugins: [
     new CleanWebpackPlugin(['dist']),
     new HtmlWebpackPlugin({
-      // inject: false,
       foo: "asdf",
       filename: 'estar.html',
       template: 'src/estar.ejs',
       chunks: ['estar']
     }),
     new HtmlWebpackPlugin({
-      // inject: false,
       foo: "asdf",
       filename: 'eui.html',
       template: 'src/eui.ejs',
       chunks: ['eui']
     }),
     new HtmlWebpackPlugin({
-      // inject: false,
       foo: "asdf",
       filename: 'ghg.html',
       template: 'src/ghg.ejs',
@@ -43,15 +36,15 @@ module.exports = {
   module: {
     rules: [
       {
-      //   test: /\.js$/,
-      //   exclude: /(node_modules|bower_components)/,
-      //   use: {
-      //     loader: 'babel-loader',
-      //     options: {
-      //      presets: ['es2015']
-      //     }
-      //   }
-      // },{
+        test: /\.js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+           presets: ['babel-preset-es2015']
+          }
+        }
+      },{
         test: /\.css$/,
         exclude: /(node_modules|bower_components)/,
         use: [

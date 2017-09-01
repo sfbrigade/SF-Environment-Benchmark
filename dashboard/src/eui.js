@@ -1,4 +1,4 @@
-import quartilesChart from '../../js/quartiles-chart.js'
+import quartilesChart from './shared-js/quartiles-chart.js'
 import {arrayQuartiles, objArrayToSortedNumArray} from './js/helpers.js'
 import {Dashboard} from './js/dashboard.js'
 

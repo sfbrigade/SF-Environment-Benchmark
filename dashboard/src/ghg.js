@@ -1,4 +1,4 @@
-import histogramChart from '../../js/histogram-chart.js'
+import histogramChart from './shared-js/histogram-chart.js'
 import {arrayQuartiles, objArrayToSortedNumArray} from './js/helpers.js'
 import {Dashboard} from './js/dashboard.js'
 

@@ -1,0 +1,7 @@
+This folder is a duplicate of ../../../js/, put here to get around some webpack/babel-loader issues with relative directories.
+
+!!!!!!!!!!
+DON'T MAKE EDITS TO THESE FILES.  EDIT THE VERSIONS IN THE ROOT JS DIRECTORY AND COPY HERE
+!!!!!!!!!!
+
+

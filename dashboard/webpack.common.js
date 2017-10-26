@@ -15,22 +15,24 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(['dist']),
     new HtmlWebpackPlugin({
-      foo: "asdf",
       filename: 'estar.html',
       template: 'src/estar.ejs',
       chunks: ['estar']
     }),
     new HtmlWebpackPlugin({
-      foo: "asdf",
       filename: 'eui.html',
       template: 'src/eui.ejs',
       chunks: ['eui']
     }),
     new HtmlWebpackPlugin({
-      foo: "asdf",
       filename: 'ghg.html',
       template: 'src/ghg.ejs',
       chunks: ['ghg']
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: 'src/index.ejs',
+      chunks: ['index']
     })
   ],
   module: {

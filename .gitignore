@@ -1,7 +1,6 @@
 .DS_Store
 bower_components/*
 node_modules/*
-dist/*
-
+dist/
 # Sublime Text
 *.sublime-*

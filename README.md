@@ -99,3 +99,24 @@ dashboard$ npm run build
 ```
 Now the files in `dashboard/dist/` are all you need to copy to a production server.
 
+
+## Notes
+The script pulls live data from [DataSF](https://data.sfgov.org/Energy-and-Environment/Existing-Commercial-Buildings-Energy-Performance-O/j2j3-acqj/data) using the function `Dashboard.startQuery()`.  
+
+Buildings are identified using Assessor Parcel Numbers (APNs).  The requested APN is read from url params with the function `helpers.getUrlVars()`.  The AJAX request to DataSF is made using `apiCalls.propertyQuery()`, which is a wrapper around the [soda-js](https://github.com/socrata/soda-js) library.
+
+If the APN doesn't exist, the page gives the error message "The record for the chosen building was not found".
+
+If a requested property is of an unsupported use type (supported building types are "Office", "Hotel", or "Retail Store"), the page displays the message "The chosen building type is not supported by this dashboard interface".  Supported building types are defined as keys in the `Dashboard.groups` object.
+
+If a building doesn't have data for the latest year, the page will show the data for the latest year available.
+
+If a building has *never* complied, the page will display a message saying "{BUILDING NAME} could not be ranked against other {BUILDING TYPE}s using the latest benchmark data." 
+
+The code in `src/js/` is roughly split into modules by function: 
+- dashboard.js: form query, make request, handle data, update page. 
+- apiCalls.js: wrapper around the soda-js library and helper functions for constructing query strings
+- dataManipulation.js: functions to manipulate and parse the query response from DataSF
+- helpers.js: miscellaneous helper functions
+
+javascript files for individual pages (estar, ghg, eui) in `src` set options and functions that are unique to each page

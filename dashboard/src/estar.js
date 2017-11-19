@@ -8,18 +8,17 @@ import './css/dashboard.css'
 import logo from './assets/sf_logo_white.png'
 var sfLogo = new Image()
 sfLogo.src = logo
-sfLogo.alt = "SF Dept of Environment"
+sfLogo.alt = 'SF Dept of Environment'
 document.getElementsByClassName('navbar-brand')[0].appendChild(sfLogo)
 
 /* page elements */
 var estarHistogramElement = d3.select('#energy-star-score-histogram')
-var estarWidth = 500 //parseInt(estarHistogramElement.style('width'))
+var estarWidth = 500 // parseInt(estarHistogramElement.style('width'))
 var estarHistogram = histogramChart()
   .width(estarWidth)
   .height(200)
-  .range([0,110])
+  .range([0, 110])
   .tickFormat(d3.format(',d'))
-
 
 Dashboard.displayPage = 'estar'
 
@@ -33,14 +32,14 @@ Dashboard.handlePropertyTypeResponse = function (rows) {
   let estarVals = objArrayToSortedNumArray(Dashboard.categoryData, 'latest_energy_star_score')
   estarVals = estarVals.filter(function (d) { return d > 0 })
 
-  let euiVals = objArrayToSortedNumArray(Dashboard.categoryData,'latest_site_eui_kbtu_ft2')
+  let euiVals = objArrayToSortedNumArray(Dashboard.categoryData, 'latest_site_eui_kbtu_ft2')
   euiVals = euiVals.filter(function (d) { return d > 1 && d < 1000 })
 
   Dashboard.singleBuildingData.localRank = rankBuildings(Dashboard.singleBuildingData.ID, Dashboard.categoryData)
   var estarQuartiles = arrayQuartiles(estarVals)
 
   Dashboard.color.energy_star_score.domain(estarQuartiles)
-  Dashboard.color.ranking.domain([ 0.25*Dashboard.singleBuildingData.localRank[1], 0.5*Dashboard.singleBuildingData.localRank[1], 0.75*Dashboard.singleBuildingData.localRank[1] ])
+  Dashboard.color.ranking.domain([ 0.25 * Dashboard.singleBuildingData.localRank[1], 0.5 * Dashboard.singleBuildingData.localRank[1], 0.75 * Dashboard.singleBuildingData.localRank[1] ])
 
   /* draw histogram for energy star */
   estarHistogram
@@ -50,8 +49,7 @@ Dashboard.handlePropertyTypeResponse = function (rows) {
     .yAxisLabel('Buildings')
   estarHistogramElement.datum(estarVals).call(estarHistogram)
 
-  estarHistogramElement.call(Dashboard.addHighlightLine,Dashboard.singleBuildingData.latest_energy_star_score, estarHistogram,Dashboard.singleBuildingData.building_name)
-
+  estarHistogramElement.call(Dashboard.addHighlightLine, Dashboard.singleBuildingData.latest_energy_star_score, estarHistogram, Dashboard.singleBuildingData.building_name)
 
   Dashboard.populateInfoBoxes(Dashboard.singleBuildingData, Dashboard.categoryData, Dashboard.floorAreaRange)
 

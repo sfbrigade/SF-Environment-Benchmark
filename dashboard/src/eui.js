@@ -3,17 +3,17 @@ import {arrayQuartiles, objArrayToSortedNumArray} from './js/helpers.js'
 import {Dashboard} from './js/dashboard.js'
 
 import './css/dashboard.css'
-
+import eui from './assets/EUI.svg'
 import logo from './assets/sf_logo_white.png'
+
 var sfLogo = new Image()
 sfLogo.src = logo
-sfLogo.alt = "SF Dept of Environment"
+sfLogo.alt = 'SF Dept of Environment'
 document.getElementsByClassName('navbar-brand')[0].appendChild(sfLogo)
 
-import eui from './assets/EUI.svg'
 var euiLogo = new Image()
 euiLogo.src = eui
-euiLogo.alt = "EUI"
+euiLogo.alt = 'EUI'
 document.getElementById('eui-icon').appendChild(euiLogo)
 
 /* page elements */
@@ -28,7 +28,7 @@ Dashboard.displayPage = 'eui'
 Dashboard.handlePropertyTypeResponse = function (rows) {
   Dashboard.cleanAndFilter(rows)
 
-  let euiVals = objArrayToSortedNumArray(Dashboard.categoryData,'latest_site_eui_kbtu_ft2')
+  let euiVals = objArrayToSortedNumArray(Dashboard.categoryData, 'latest_site_eui_kbtu_ft2')
   euiVals = euiVals.filter(function (d) { return d > 1 && d < 1000 })
 
   Dashboard.color.site_eui_kbtu_ft2.domain(arrayQuartiles(euiVals))
@@ -42,7 +42,6 @@ Dashboard.handlePropertyTypeResponse = function (rows) {
     .margin({top: 20, right: 80, bottom: 20, left: 50})
   euiChartElement.datum(euiVals).call(euiChart)
   euiChartElement.call(Dashboard.addHighlightLine, Dashboard.singleBuildingData.latest_site_eui_kbtu_ft2, euiChart, Dashboard.singleBuildingData.building_name)
-
 
   Dashboard.populateInfoBoxes(Dashboard.singleBuildingData, Dashboard.categoryData, Dashboard.floorAreaRange)
 

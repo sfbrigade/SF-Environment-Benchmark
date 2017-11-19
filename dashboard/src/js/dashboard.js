@@ -126,7 +126,7 @@ function handleSingleBuildingResponse(rows) {
   /* check to see if the returned building is one of our supported building types */
   if (Object.keys(Dashboard.groups).indexOf(type) == -1) {
     console.error("not a supported building type");
-    $('#view-load').html('The chosen building type is not supported by this dashboard interface')
+    $('#view-load').html('SF Environment’s ECBO postcards support buildings that are more than 80% office, hotel, or retail. For information on how your building’s performance compares to national medians, check out <a href="http://www.portfoliomanager.energystar.gov">www.portfoliomanager.energystar.gov</a>.')
   } else {
     let minMax = Dashboard.groups[type].scale.invertExtent(Dashboard.groups[type].scale(+Dashboard.singleBuildingData.floor_area))
     Dashboard.floorAreaRange = minMax

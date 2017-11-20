@@ -198,6 +198,12 @@ Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorA
   d3.select('#compliance-status-current').html(complianceStatusString(singleBuildingData.latest_benchmark))
   d3.select('#compliance-status-previous').html(complianceStatusString(singleBuildingData.prev_year_benchmark))
 
+  let auditDueDate =  new Date(singleBuildingData.energy_audit_due_date)
+  // let parser = d3.time.format('%B %Y')
+  d3.select('#audit-status-date').html(auditDueDate.getFullYear())
+  d3.select('#audit-status').html(auditStatusIndicator(singleBuildingData.energy_audit_status))
+
+
   function complianceStatusString (status) {
     var indicator
     if (status === 'Complied') {
@@ -210,6 +216,20 @@ Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorA
 
     return `${indicator} ${status}`
   }
+  function auditStatusIndicator (status) {
+    var indicator
+    if (status === 'Complied') {
+      indicator = ' <i class="fa fa-check ok" aria-hidden="true"></i>'
+    } else if (status.includes('Exempt') || status === 'Municipal' || status === 'Pending' || status === 'Upcoming') {
+      indicator = ' <i class="fa fa-check alrt" aria-hidden="true"></i>'
+    } else if (status === 'Did Not Comply') {
+      indicator = ' <i class="fa fa-times attn" aria-hidden="true"></i>'
+    } else {
+      indicator = ' <i class="fa fa-question alrt" aria-hidden="true"></i>'
+    }
+    return `${indicator} ${status}`
+  }
+  return null
 }
 
 /**

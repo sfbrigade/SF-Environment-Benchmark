@@ -50,7 +50,7 @@ Dashboard.handlePropertyTypeResponse = function (rows) {
   estarHistogramElement.datum(estarVals).call(estarHistogram)
   if (Dashboard.singleBuildingData.latest_benchmark === 'Complied') {
     estarHistogramElement.call(Dashboard.addHighlightLine, Dashboard.singleBuildingData.latest_energy_star_score, estarHistogram, Dashboard.singleBuildingData.building_name)
-    d3.select('.local-ranking-container').classed('hidden', false)
+    d3.selectAll('.local-ranking-container').classed('hidden', false)
   }
 
   Dashboard.populateInfoBoxes(Dashboard.singleBuildingData, Dashboard.categoryData, Dashboard.floorAreaRange)

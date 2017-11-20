@@ -17,6 +17,8 @@ function histogramChart() {
   var xAxisLabel = ''
   var yAxisLabel = ''
 
+  var shadeArea = false
+
   function chart(selection) {
     selection.each(function(data) {
 
@@ -40,6 +42,7 @@ function histogramChart() {
       var gEnter = svg.enter().append("svg").append("g");
       gEnter.append("g").attr("class", "x axis");
       gEnter.append("g").attr("class", "y axis");
+      var shadedArea = gEnter.append('g').attr('class', 'shaded')
       gEnter.append("g").attr("class", "bars");
 
       // Update the outer dimensions.
@@ -49,6 +52,15 @@ function histogramChart() {
       // Update the inner dimensions.
       var g = svg.select("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      if (shadeArea) {
+        shadedArea.append('rect').attr('class', 'shaded')
+          .attr("x", x(75))
+          .attr("y", y.range()[1])
+          .attr("width", x(100) - x(75))
+          .attr("height", y.range()[0])
+          .attr('fill', shadeArea)
+      }
 
       // Update the bars.
       var bar = svg.select(".bars").selectAll(".bar").data(data);
@@ -142,6 +154,12 @@ function histogramChart() {
   };
   chart.yScale = function(_) {
     if (!arguments.length) return y;
+    return chart;
+  };
+
+  chart.shadeArea = function(_) {
+    if (!arguments.length) return shadeArea;
+    shadeArea = _;
     return chart;
   };
 

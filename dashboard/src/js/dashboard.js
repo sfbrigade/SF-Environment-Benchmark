@@ -8,13 +8,12 @@ let Dashboard = {}
 
 // TODO: CHANGE limit on returned properties in function propertyTypeQuery()
 
-/* glogal reference objects */
-/* colorSwatches should be shared between map.js & dashboard.js */
 Dashboard.colorSwatches = {
   energy_star_score: ['#EF839E', '#ECD68C', '#80D9AF', '#4FAD8E'],
   total_ghg_emissions_intensity_kgco2e_ft2: ['#4FAD8E', '#80D9AF', '#ECD68C', '#EF839E'],
   site_eui_kbtu_ft2: ['#4FAD8E', '#80D9AF', '#ECD68C', '#EF839E', '#ed5b5b'], // has to be 5 colors for the gradient to look right
-  highlight: '#3e6ee9'
+  highlight: '#3e6ee9',
+  shaded: '#dadada'
 }
 
 Dashboard.color = {
@@ -199,8 +198,15 @@ Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorA
   d3.select('#compliance-status-previous').html(complianceStatusString(singleBuildingData.prev_year_benchmark))
 
   var auditDueDate = new Date(singleBuildingData.energy_audit_due_date)
-  d3.select('#audit-status-date').html(auditDueDate.getFullYear())
+  d3.select('#audit-date').html(auditDueDate.getFullYear())
   d3.select('#audit-status').html(auditStatusIndicator(singleBuildingData.energy_audit_status))
+
+  if (singleBuildingData.next_audit_due_date) {
+    var nextAuditDueDate = new Date(singleBuildingData.next_audit_due_date)
+    d3.select('#next-audit-date').html(nextAuditDueDate.getFullYear())
+    d3.select('#next-audit-status').html(singleBuildingData.next_energy_audit_status)
+    d3.select('#next-audit').classed('hidden', false)
+  }
 
   function complianceStatusString (status) {
     var indicator
@@ -211,9 +217,9 @@ Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorA
     } else {
       indicator = ' <i class="fa fa-times attn" aria-hidden="true"></i>'
     }
-
     return `${indicator} ${status}`
   }
+
   function auditStatusIndicator (status) {
     var indicator
     if (status === 'Complied') {

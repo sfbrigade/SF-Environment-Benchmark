@@ -18,10 +18,10 @@ The dashboard is a way to show building owners and property managers their build
 
 ### Live links
 - SF Environment Benchmark Dashboards (Example building):
-   + [Energy Star](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/dashboard/estar.html?apn=3705/039)
-   + [EUI](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/dashboard/eui.html?apn=3705/039)
-   + [GHG](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/dashboard/ghg.html?apn=3705/039)
-   - selection of several [example buildings](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/dashboard/test.html)
+   + [Energy Star](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/estar.html?apn=3705/039)
+   + [EUI](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/eui.html?apn=3705/039)
+   + [GHG](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/ghg.html?apn=3705/039)
+   - ~~selection of several [example buildings](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/dashboard/test.html)~~
 - [SF Energy and GHG Map Visualization](http://old.codeforsanfrancisco.org/datasci-SF-Environment-Benchmark/map)
 - [Design mockups for building-profile dashboard](https://projects.invisionapp.com/share/2SAI4AK48#/screens/219556065_SF-Environment-Benchmark)
 
@@ -41,7 +41,7 @@ The dashboard is a way to show building owners and property managers their build
 | Baolin Liu | | Modeling |
 
 ## Built With
-- [D3](https://d3js.org/)
+- [D3](https://d3js.org/) v3
 - [Leaflet](http://leafletjs.com/)
 - [Mapbox.js](https://www.mapbox.com/mapbox-gl-js/api/)
 - [Soda.js](https://github.com/socrata/soda-js)
@@ -111,10 +111,10 @@ If a requested property is of an unsupported use type (supported building types 
 
 If a building doesn't have data for the latest year, the page will show the data for the latest year available.
 
-If a building has *never* complied, the page will display a message saying "{BUILDING NAME} could not be ranked against other {BUILDING TYPE}s using the latest benchmark data." 
+If a building has *never* complied, the page will display a message saying "{BUILDING NAME} could not be ranked against other {BUILDING TYPE}s using the latest benchmark data."
 
-The code in `src/js/` is roughly split into modules by function: 
-- dashboard.js: form query, make request, handle data, update page. 
+The code in `src/js/` is roughly split into modules by function:
+- dashboard.js: form query, make request, handle data, update page.
 - apiCalls.js: wrapper around the soda-js library and helper functions for constructing query strings
 - dataManipulation.js: functions to manipulate and parse the query response from DataSF
 - helpers.js: miscellaneous helper functions

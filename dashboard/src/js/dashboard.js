@@ -198,11 +198,9 @@ Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorA
   d3.select('#compliance-status-current').html(complianceStatusString(singleBuildingData.latest_benchmark))
   d3.select('#compliance-status-previous').html(complianceStatusString(singleBuildingData.prev_year_benchmark))
 
-  let auditDueDate =  new Date(singleBuildingData.energy_audit_due_date)
-  // let parser = d3.time.format('%B %Y')
+  var auditDueDate = new Date(singleBuildingData.energy_audit_due_date)
   d3.select('#audit-status-date').html(auditDueDate.getFullYear())
   d3.select('#audit-status').html(auditStatusIndicator(singleBuildingData.energy_audit_status))
-
 
   function complianceStatusString (status) {
     var indicator

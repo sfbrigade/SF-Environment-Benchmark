@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="75px" height="39px" viewBox="0 0 75 39" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>EUI</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="-22" y="-4.03652636" width="110" height="41.5961538"></rect>
+    </defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="EUI">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <g id="Mask"></g>
+            <ellipse id="Oval" stroke="#EEEEEE" stroke-width="8.32" mask="url(#mask-2)" cx="37.6125285" cy="37.5596275" rx="32.5670103" ry="32.7115385"></ellipse>
+            <path d="M42.3938927,34.728153 C42.2171786,36.5196011 40.7525456,37.9173877 38.971913,37.9173877 C37.0721294,37.9173877 35.5320504,36.3262765 35.5320504,34.3635415 C35.5320504,33.4318375 35.8790873,32.5838741 36.4469001,31.9500959 C36.4677382,31.9088607 36.4932835,31.8683258 36.5236357,31.829015 L46.2996574,19.1675597 C46.570346,18.8169763 46.6958353,18.8823158 46.5818555,19.3063934 L42.4997084,34.4945951 C42.4761179,34.582367 42.4399847,34.6606932 42.3938927,34.728153 Z M38.971913,37.2712338 C40.5262814,37.2712338 41.786346,35.9694156 41.786346,34.3635415 C41.786346,32.7576674 40.5262814,31.4558492 38.971913,31.4558492 C37.4175446,31.4558492 36.15748,32.7576674 36.15748,34.3635415 C36.15748,35.9694156 37.4175446,37.2712338 38.971913,37.2712338 Z" id="Combined-Shape" fill="#EEEEEE" mask="url(#mask-2)" transform="translate(41.077982, 28.429419) rotate(22.000000) translate(-41.077982, -28.429419) "></path>
+        </g>
+    </g>
+</svg>

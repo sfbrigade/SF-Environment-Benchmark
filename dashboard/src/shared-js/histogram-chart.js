@@ -1,7 +1,7 @@
 // TODO: tooltip for histogram bars to show count
 
 function histogramChart() {
-  var margin = {top: 5, right: 5, bottom: 30, left: 25},
+  var margin = {top: 5, right: 5, bottom: 40, left: 50},
       width = 960,
       height = 500
 
@@ -68,7 +68,7 @@ function histogramChart() {
           .call(xAxis)
       svg.selectAll('.xlabel').remove()
       svg.append('text')
-          .attr("transform", "translate(" + (width - margin.right) + "," + (height - 3) + ")")
+          .attr("transform", "translate(" + (width - margin.right) + "," + (height - 4) + ")")
           .attr('class', 'axis axislabel xlabel')
           .style("text-anchor", "end")
           .text(xAxisLabel)
@@ -79,7 +79,7 @@ function histogramChart() {
           .call(yAxis)
       svg.selectAll('.ylabel').remove()
       svg.append('text')
-          .attr("transform", "translate(" + (margin.left + 10) + "," + (margin.top) + ")rotate(-90)")
+          .attr("transform", "translate(" + (margin.left - 35) + "," + (margin.top) + ")rotate(-90)")
           .attr('class', 'axis axislabel ylabel')
           .style("text-anchor", "end")
           .text(yAxisLabel)

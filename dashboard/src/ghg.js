@@ -45,7 +45,7 @@ Dashboard.handlePropertyTypeResponse = function (rows) {
     .colorScale(Dashboard.color.total_ghg_emissions_intensity_kgco2e_ft2)
     .bins(100)
     .xAxisLabel('GHG Emissions (Metric Tons CO2)')
-    .yAxisLabel('Buildings')
+    .yAxisLabel('# of Buildings')
     // .tickFormat(d3.format("d"))
   ghgHistogramElement.datum(ghgVals).call(ghgHistogram)
   ghgHistogramElement.call(Dashboard.addHighlightLine, Dashboard.singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e, ghgHistogram, Dashboard.singleBuildingData.building_name)

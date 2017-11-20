@@ -46,10 +46,12 @@ Dashboard.handlePropertyTypeResponse = function (rows) {
     .colorScale(Dashboard.color.energy_star_score)
     .bins(20)
     .xAxisLabel('Energy Star Score')
-    .yAxisLabel('Buildings')
+    .yAxisLabel('# of Buildings')
   estarHistogramElement.datum(estarVals).call(estarHistogram)
-
-  estarHistogramElement.call(Dashboard.addHighlightLine, Dashboard.singleBuildingData.latest_energy_star_score, estarHistogram, Dashboard.singleBuildingData.building_name)
+  if (Dashboard.singleBuildingData.latest_benchmark === 'Complied') {
+    estarHistogramElement.call(Dashboard.addHighlightLine, Dashboard.singleBuildingData.latest_energy_star_score, estarHistogram, Dashboard.singleBuildingData.building_name)
+    d3.select('.local-ranking-container').classed('hidden', false)
+  }
 
   Dashboard.populateInfoBoxes(Dashboard.singleBuildingData, Dashboard.categoryData, Dashboard.floorAreaRange)
 

@@ -80,8 +80,11 @@ body {
 .attn {
 	color: #EF839E;
 }
-.fa-check {
+.ok {
 	color: green;
+}
+.alrt {
+	color: #3e6ee9;
 }
 .fa-check, .fa-times {
 	font-size: 1.5em;
@@ -295,7 +298,11 @@ h4 {
 .local-ranking-lg {
 	color: #3D3D3D;
 	font-size: 40px;
-	letter-spacing: -5px;
+	letter-spacing: -3px;
+}
+.estar-lg {
+	color: #3e6ee9;
+	font-size: 40px;
 }
 .local-ranking-container {
 	padding-top: 7%;
@@ -335,4 +342,8 @@ h4 {
 .axislabel {
 	font-size: 12px;
 	fill: #777;
+}
+
+.estar-ranking-text {
+	padding-top: 1em;
 }

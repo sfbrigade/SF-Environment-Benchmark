@@ -14,7 +14,7 @@ Dashboard.colorSwatches = {
   energy_star_score: ['#EF839E', '#ECD68C', '#80D9AF', '#4FAD8E'],
   total_ghg_emissions_intensity_kgco2e_ft2: ['#4FAD8E', '#80D9AF', '#ECD68C', '#EF839E'],
   site_eui_kbtu_ft2: ['#4FAD8E', '#80D9AF', '#ECD68C', '#EF839E', '#ed5b5b'], // has to be 5 colors for the gradient to look right
-  highlight: '#0d32d4'
+  highlight: '#3e6ee9'
 }
 
 Dashboard.color = {
@@ -150,11 +150,19 @@ Dashboard.cleanAndFilter = function (rows) {
 * @return null
 */
 Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorAreaRange) {
+  let displayType = Dashboard.groups[singleBuildingData.property_type_self_selected].plural
+  let complianceMessage = {
+    'Violation - Did Not Report': `${singleBuildingData.building_name} cannot receive a ranking comparing it to similar-sized ${displayType} in San Francisco, because an annual energy benchmark for ${singleBuildingData.latest_benchmark_year} has not been submitted.`,
+    'Exempt': `${singleBuildingData.building_name} cannot receive a ranking comparing it to similar-sized ${displayType} in San Francisco, because an annual energy benchmark for ${singleBuildingData.latest_benchmark_year} was exempted.`,
+    'Violation - Insufficient Data': `${singleBuildingData.building_name} cannot receive a ranking comparing it to similar-sized ${displayType} in San Francisco, because an annual energy benchmark for ${singleBuildingData.latest_benchmark_year} was rejected due to data quality issues. Please contact the ECB Helpdesk for more information.`
+  }
+
+  d3.select('#building-apn').text(singleBuildingData.parcel_s)
   if (Dashboard.displayPage === 'estar') {
     d3.select('#building-energy-star-score').text(singleBuildingData.latest_energy_star_score)
     d3.selectAll('.building-energy-star-score-year').text(singleBuildingData.latest_energy_star_score_year)
     if (!singleBuildingData.latest_energy_star_score) {
-      d3.select('#estar-text').html(`The national <span class="building-type-lower">BUILDING TYPE</span> median energy star score is 50.`)
+      d3.select('#estar-text').html(`The national median energy star score for <span class="building-type-lower">BUILDING TYPE</span> is 50.`)
     }
     if (singleBuildingData.localRank) {
       d3.selectAll('.building-ranking-text').text(singleBuildingData.localRank[0])
@@ -162,7 +170,7 @@ Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorA
     } else {
       // the building is not rankable: did not report an estar score OR the % change in eui either increased by more than 100 or decreased by more than 80 over the previous 2 years
       d3.select('.local-ranking-container').classed('hidden', true)
-      d3.selectAll('.estar-ranking-text').text(`${singleBuildingData.building_name} could not be ranked against other ${singleBuildingData.property_type_self_selected.toLowerCase()}s using the latest benchmark data.`)
+      d3.selectAll('.estar-ranking-text').html(complianceMessage[singleBuildingData.latest_benchmark])
     }
   } else if (Dashboard.displayPage === 'ghg') {
     d3.selectAll('.building-ghg-emissions').text(singleBuildingData.latest_total_ghg_emissions_metric_tons_co2e)
@@ -171,8 +179,8 @@ Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorA
     d3.select('#building-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
   }
 
-  d3.selectAll('.building-type-lower').text(singleBuildingData.property_type_self_selected.toLowerCase())
-  d3.selectAll('.building-type-upper').text(singleBuildingData.property_type_self_selected.toUpperCase())
+  d3.selectAll('.building-type-lower').text(displayType.toLowerCase())
+  d3.selectAll('.building-type-upper').text(displayType.toUpperCase())
 
   d3.select('#building-floor-area').text(helpers.numberWithCommas(singleBuildingData.floor_area))
   d3.selectAll('.building-name').text(singleBuildingData.building_name)
@@ -184,17 +192,24 @@ Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorA
   )
   d3.selectAll('.building-type-sq-ft').text(helpers.numberWithCommas(floorAreaRange[0]) + '-' + helpers.numberWithCommas(floorAreaRange[1]))
 
-  var complianceStatusIndicator = `${singleBuildingData.latest_benchmark_year}: ${complianceStatusString(singleBuildingData.latest_benchmark)} <br>
-  ${singleBuildingData.latest_benchmark_year - 1}: ${complianceStatusString(singleBuildingData.prev_year_benchmark)}`
+  d3.select('#compliance-current-year').text(`${singleBuildingData.latest_benchmark_year}:`)
+  d3.select('#compliance-previous-year').text(`${singleBuildingData.latest_benchmark_year - 1}:`)
+
+  d3.select('#compliance-status-current').html(complianceStatusString(singleBuildingData.latest_benchmark))
+  d3.select('#compliance-status-previous').html(complianceStatusString(singleBuildingData.prev_year_benchmark))
 
   function complianceStatusString (status) {
-    var indicator = (status === 'Complied')
-      ? ' <i class="fa fa-check" aria-hidden="true"></i>'
-      : ' <i class="fa fa-times attn" aria-hidden="true"></i>'
+    var indicator
+    if (status === 'Complied') {
+      indicator = ' <i class="fa fa-check ok" aria-hidden="true"></i>'
+    } else if (status === 'Exempt') {
+      indicator = ' <i class="fa fa-check alrt" aria-hidden="true"></i>'
+    } else {
+      indicator = ' <i class="fa fa-times attn" aria-hidden="true"></i>'
+    }
+
     return `${indicator} ${status}`
   }
-
-  d3.select('#compliance-status').html(complianceStatusIndicator)
 }
 
 /**
@@ -236,13 +251,13 @@ Dashboard.addHighlightLine = function (selection, data, chart, label) {
         .attr('stroke-width', 3)
         .attr('stroke-dasharray', '5,3')
         .attr('fill', 'none')
-  hl.enter().append('text')
-        .attr('x', textPos)
-        .attr('y', 16)
-        .attr('text-anchor', textAnchor)
-        .attr('alignment-baseline', 'top')
-        .attr('fill', Dashboard.colorSwatches.highlight)
-        .text(label)
+  // hl.enter().append('text')
+  //       .attr('x', textPos)
+  //       .attr('y', 16)
+  //       .attr('text-anchor', textAnchor)
+  //       .attr('alignment-baseline', 'top')
+  //       .attr('fill', Dashboard.colorSwatches.highlight)
+  //       .text(label)
   hl.exit().remove()
 }
 

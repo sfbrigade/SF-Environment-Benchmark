@@ -22,49 +22,67 @@
       <div class="col-xs-12 col-md-9">
         <div class="row">
           <div id="tabs">
-            <ul class="nav nav-pills">
+            <!-- <ul class="nav nav-pills">
               <li class="active">
                 <a id="energy-star-tab" href="#energy-score" data-toggle="tab">LOCAL RANKING</a>
               </li>
-            </ul>
+            </ul> -->
             <div class="tab-content clearfix">
               <div class="tab-pane active" id="energy-score">
+                <div class="row center border-bottom">
+                  <span class="building-name side">Building Name</span>
+                </div>
                 <div class="row border-bottom">
                   <div class="col-xs-12 col-md-3">
                     <div class="row center">
                       <div class="local-ranking-container">
+                        <span>LOCAL RANKING</span><br>
                         <span class="local-ranking-lg">#<span class="building-ranking-text"></span></span>
-                        <br>out of <span class="total-building-type">100</span> buildings
-                        <span class="center"><a data-toggle="tooltip" data-placement="right" title="The local ranking figure compares peer buildings by their ENERGY STAR Score. In cases where the rank is identical, a building's site EUI is also used. The higher a ranking, the better a building's performance.">  <i class="fa fa-info-circle" aria-hidden="true"></i></a></span>
+                        <br>out of <span class="total-building-type">100</span>
+                        <br>Similar Size <span class="building-type-lower">BUILDING TYPE</span>
+                        <span class="center"><a data-toggle="tooltip" data-placement="bottom" title="The local ranking figure compares peer buildings by their ENERGY STAR Score. In cases where the rank is identical, a building's site EUI is also used. The lower the ranking, the better a building’s performance.">  <i class="fa fa-info-circle" aria-hidden="true"></i></a></span>
                       </div>
                     </div>
                   </div>
                   <div class="col-xs-12 col-md-7">
                     <div class="estar-ranking-text">
-                      Based on the ENERGY STAR score and Energy Use Intensity reported in <span class="building-energy-star-score-year">2015</span>, energy use at <span class="building-name">BUILDING NAME</span> is ranked <span class="building-ranking-text">RANK</span>											out of <span class="total-building-type">RANK NUMBER</span> <span class="building-type-lower">BUILDING TYPE</span>s between <span class="building-type-sq-ft">RANGE</span> square feet in gross floor area.
+                      Based on the ENERGY STAR score and Energy Use Intensity reported in <span class="building-energy-star-score-year">2015</span>, energy use at <span class="building-name">BUILDING NAME</span> is ranked <span class="building-ranking-text">RANK</span> out of <span class="total-building-type">RANK NUMBER</span> <span class="building-type-lower">BUILDING TYPE</span> between <span class="building-type-sq-ft">RANGE</span> square feet in gross floor area.
                     </div>
                   </div>
-                  <div class="col-xs-2"></div>
-                </div>
-                <div class="row center">
-                  <div class="col-xs-2"></div>
-                  <div class="col-xs-8">
-                    <div class="chart-title">
-                      LATEST ENERGY STAR SCORE FOR <span class="building-type-upper">HOTEL</span> BUILDINGS IN SAN FRANCISCO <span class="building-type-sq-ft">150,000-200,000</span> SQUARE FEET
-                    </div>
+                  <div class="col-xs-2">
+                    <div class=""></div>
                   </div>
-                  <div class="col-xs-2"></div>
                 </div>
                 <div class="row center hidden-xs">
                   <div class="col-xs-2"></div>
-                  <div class="col-xs-8">
+                  <div class="col-md-8">
+                    <div class="chart-title">
+                      LATEST ENERGY STAR SCORES FOR <span class="building-type-upper">HOTEL</span> <br>
+                      <span class="building-type-sq-ft">150,000-200,000</span> SQUARE FEET IN SAN FRANCISCO
+                    </div>
+                  </div>
+
+                </div>
+                <div class="row center">
+                  <div class="col-sm-3 col-xs-12">
+                    <div class="row center">
+                      <div class="local-ranking-container hidden">
+                        <span>ENERGY STAR Score</span><br>
+                        <span id="building-energy-star-score" class="estar-lg"></span>
+                        <br>out of 100
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-7 hidden-xs">
                     <!-- <div class="loading">Loading&mdash;</div> -->
                     <div id="energy-star-score-histogram" class="histogram-chart"></div>
                     <div id="demo" class="hidden">
                       <input type="number" id="change-estar-input" value="100"><button id="change-estar">change bin numbers</button>
                     </div>
                   </div>
-                  <div class="col-xs-2"></div>
+                  <div class="col-sm-2 hidden-xs">
+                    <div id="legend" class="legend"></div>
+                  </div>
                 </div>
                 <div class="row">
                   <div class="col-xs-12 panel-bottom">

@@ -1,7 +1,7 @@
 // TODO: tooltip for histogram bars to show count
 
 function histogramChart() {
-  var margin = {top: 5, right: 5, bottom: 30, left: 25},
+  var margin = {top: 5, right: 5, bottom: 40, left: 50},
       width = 960,
       height = 500
 
@@ -16,6 +16,8 @@ function histogramChart() {
 
   var xAxisLabel = ''
   var yAxisLabel = ''
+
+  var shadeArea = false
 
   function chart(selection) {
     selection.each(function(data) {
@@ -38,9 +40,10 @@ function histogramChart() {
 
       // Otherwise, create the skeletal chart.
       var gEnter = svg.enter().append("svg").append("g");
+      var shadedArea = gEnter.append('g').attr('class', 'shaded')
+      gEnter.append("g").attr("class", "bars");
       gEnter.append("g").attr("class", "x axis");
       gEnter.append("g").attr("class", "y axis");
-      gEnter.append("g").attr("class", "bars");
 
       // Update the outer dimensions.
       svg .attr("width", width)
@@ -49,6 +52,15 @@ function histogramChart() {
       // Update the inner dimensions.
       var g = svg.select("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      if (shadeArea) {
+        shadedArea.append('rect').attr('class', 'shaded')
+          .attr("x", x(75))
+          .attr("y", y.range()[1])
+          .attr("width", x(102) - x(75))
+          .attr("height", y.range()[0])
+          .attr('fill', shadeArea)
+      }
 
       // Update the bars.
       var bar = svg.select(".bars").selectAll(".bar").data(data);
@@ -68,7 +80,7 @@ function histogramChart() {
           .call(xAxis)
       svg.selectAll('.xlabel').remove()
       svg.append('text')
-          .attr("transform", "translate(" + (width - margin.right) + "," + (height - 3) + ")")
+          .attr("transform", "translate(" + (width - margin.right) + "," + (height - 4) + ")")
           .attr('class', 'axis axislabel xlabel')
           .style("text-anchor", "end")
           .text(xAxisLabel)
@@ -79,7 +91,7 @@ function histogramChart() {
           .call(yAxis)
       svg.selectAll('.ylabel').remove()
       svg.append('text')
-          .attr("transform", "translate(" + (margin.left + 10) + "," + (margin.top) + ")rotate(-90)")
+          .attr("transform", "translate(" + (margin.left - 35) + "," + (margin.top) + ")rotate(-90)")
           .attr('class', 'axis axislabel ylabel')
           .style("text-anchor", "end")
           .text(yAxisLabel)
@@ -142,6 +154,12 @@ function histogramChart() {
   };
   chart.yScale = function(_) {
     if (!arguments.length) return y;
+    return chart;
+  };
+
+  chart.shadeArea = function(_) {
+    if (!arguments.length) return shadeArea;
+    shadeArea = _;
     return chart;
   };
 

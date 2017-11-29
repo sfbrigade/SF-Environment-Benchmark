@@ -309,7 +309,8 @@ h4 {
 	font-size: 40px;
 }
 .local-ranking-container {
-	padding-top: 7%;
+	padding-top: 1em;
+	padding-bottom: 1em;
 }
 .tooltip-inner {
 	width: 300px;

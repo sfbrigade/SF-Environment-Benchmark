@@ -163,7 +163,8 @@ Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorA
     if (!singleBuildingData.latest_energy_star_score) {
       d3.select('#estar-text').html(`The national median energy star score for <span class="building-type-lower">BUILDING TYPE</span> is 50.`)
     }
-    if (singleBuildingData.localRank) {
+    let re = /violation|exempt/i
+    if (!re.test(Dashboard.singleBuildingData.latest_benchmark)) {
       d3.selectAll('.building-ranking-text').text(singleBuildingData.localRank[0])
       d3.selectAll('.total-building-type').text(singleBuildingData.localRank[1])
     } else {
@@ -178,7 +179,7 @@ Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorA
     d3.select('#building-eui').text(singleBuildingData.latest_site_eui_kbtu_ft2)
   }
 
-  d3.selectAll('.building-type-lower').text(displayType.toLowerCase())
+  d3.selectAll('.building-type-lower').text(displayType)
   d3.selectAll('.building-type-upper').text(displayType.toUpperCase())
 
   d3.select('#building-floor-area').text(helpers.numberWithCommas(singleBuildingData.floor_area))
@@ -198,13 +199,13 @@ Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorA
   d3.select('#compliance-status-previous').html(complianceStatusString(singleBuildingData.prev_year_benchmark))
 
   var auditDueDate = new Date(singleBuildingData.energy_audit_due_date)
-  d3.select('#audit-date').html(auditDueDate.getFullYear())
+  d3.select('#audit-date').html(`${auditDueDate.getFullYear()}:`)
   d3.select('#audit-status').html(auditStatusIndicator(singleBuildingData.energy_audit_status))
 
   if (singleBuildingData.next_audit_due_date) {
     var nextAuditDueDate = new Date(singleBuildingData.next_audit_due_date)
-    d3.select('#next-audit-date').html(nextAuditDueDate.getFullYear())
-    d3.select('#next-audit-status').html(singleBuildingData.next_energy_audit_status)
+    d3.select('#next-audit-date').html(`${nextAuditDueDate.getFullYear()}:`)
+    d3.select('#next-audit-status').html(auditStatusIndicator(singleBuildingData.next_energy_audit_status))
     d3.select('#next-audit').classed('hidden', false)
   }
 
@@ -224,8 +225,10 @@ Dashboard.populateInfoBoxes = function (singleBuildingData, categoryData, floorA
     var indicator
     if (status === 'Complied') {
       indicator = ' <i class="fa fa-check ok" aria-hidden="true"></i>'
-    } else if (status.includes('Exempt') || status === 'Municipal' || status === 'Pending' || status === 'Upcoming') {
+    } else if (status.includes('Exempt') || status === 'Municipal' || status === 'Pending') {
       indicator = ' <i class="fa fa-check alrt" aria-hidden="true"></i>'
+    } else if (status === 'Upcoming') {
+      indicator = ' <i class="fa fa-arrow-right upcoming" aria-hidden="true"></i>'
     } else if (status === 'Did Not Comply') {
       indicator = ' <i class="fa fa-times attn" aria-hidden="true"></i>'
     } else {

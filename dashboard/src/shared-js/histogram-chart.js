@@ -40,10 +40,10 @@ function histogramChart() {
 
       // Otherwise, create the skeletal chart.
       var gEnter = svg.enter().append("svg").append("g");
-      gEnter.append("g").attr("class", "x axis");
-      gEnter.append("g").attr("class", "y axis");
       var shadedArea = gEnter.append('g').attr('class', 'shaded')
       gEnter.append("g").attr("class", "bars");
+      gEnter.append("g").attr("class", "x axis");
+      gEnter.append("g").attr("class", "y axis");
 
       // Update the outer dimensions.
       svg .attr("width", width)
@@ -57,7 +57,7 @@ function histogramChart() {
         shadedArea.append('rect').attr('class', 'shaded')
           .attr("x", x(75))
           .attr("y", y.range()[1])
-          .attr("width", x(100) - x(75))
+          .attr("width", x(102) - x(75))
           .attr("height", y.range()[0])
           .attr('fill', shadeArea)
       }

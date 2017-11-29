@@ -86,6 +86,9 @@ body {
 .alrt {
 	color: #3e6ee9;
 }
+.upcoming {
+	color: #F78C66;
+}
 .fa-check, .fa-times {
 	font-size: 1.5em;
 }
@@ -301,7 +304,8 @@ h4 {
 	letter-spacing: -3px;
 }
 .estar-lg {
-	color: #3e6ee9;
+	color: #3D3D3D;
+	/*color: #3e6ee9;*/
 	font-size: 40px;
 }
 .local-ranking-container {

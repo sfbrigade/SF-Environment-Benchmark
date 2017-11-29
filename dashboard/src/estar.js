@@ -37,6 +37,7 @@ Dashboard.handlePropertyTypeResponse = function (rows) {
   euiVals = euiVals.filter(function (d) { return d > 1 && d < 1000 })
 
   Dashboard.singleBuildingData.localRank = rankBuildings(Dashboard.singleBuildingData.ID, Dashboard.categoryData)
+
   var estarQuartiles = arrayQuartiles(estarVals)
 
   Dashboard.color.energy_star_score.domain(estarQuartiles)
